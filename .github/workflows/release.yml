@@ -1,0 +1,90 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - goos: linux
+            goarch: amd64
+            suffix: ""
+          - goos: linux
+            goarch: arm64
+            suffix: ""
+          - goos: darwin
+            goarch: amd64
+            suffix: ""
+          - goos: darwin
+            goarch: arm64
+            suffix: ""
+          - goos: windows
+            goarch: amd64
+            suffix: ".exe"
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.26'
+
+      - name: Get version
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Build binary
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: 0
+        run: |
+          OUTPUT_NAME="xgg-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.suffix }}"
+          go build -ldflags="-s -w -X main.Version=${{ steps.version.outputs.VERSION }}" -o "$OUTPUT_NAME"
+          
+          # Create archive for Linux/macOS
+          if [[ "${{ matrix.goos }}" == "linux" || "${{ matrix.goos }}" == "darwin" ]]; then
+            tar czf "$OUTPUT_NAME.tar.gz" "$OUTPUT_NAME"
+            echo "ARCHIVE_NAME=$OUTPUT_NAME.tar.gz" >> $GITHUB_ENV
+          else
+            # Create zip for Windows
+            7z a "$OUTPUT_NAME.zip" "$OUTPUT_NAME"
+            echo "ARCHIVE_NAME=$OUTPUT_NAME.zip" >> $GITHUB_ENV
+          fi
+
+      - name: Generate checksums
+        run: |
+          cd . || true
+          shasum -a 256 "$ARCHIVE_NAME" > "$ARCHIVE_NAME.sha256"
+          cat "$ARCHIVE_NAME.sha256"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: xgg-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: |
+            xgg-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.suffix }}
+            ${{ env.ARCHIVE_NAME }}
+            ${{ env.ARCHIVE_NAME }}.sha256
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            xgg-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.suffix }}
+            ${{ env.ARCHIVE_NAME }}
+            ${{ env.ARCHIVE_NAME }}.sha256
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

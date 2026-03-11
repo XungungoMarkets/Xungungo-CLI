@@ -28,9 +28,50 @@
 
 ---
 
-## 🔽 Instalación
+  ## 🔽 Instalación
 
-### Desde Go (Recomendado)
+### Desde GitHub Releases (Recomendado) ⭐
+
+Descarga el binario pre-compilado para tu sistema operativo desde la página de [Releases](https://github.com/XungungoMarkets/xgg/releases).
+
+**Linux/macOS:**
+```bash
+# Descargar el archivo (reemplaza VERSION con la versión deseada)
+wget https://github.com/XungungoMarkets/xgg/releases/download/vVERSION/xgg-linux-amd64.tar.gz
+
+# Extraer
+tar xzf xgg-linux-amd64.tar.gz
+
+# Mover a PATH
+sudo mv xgg /usr/local/bin/
+```
+
+**macOS (Apple Silicon):**
+```bash
+# Descargar
+wget https://github.com/XungungoMarkets/xgg/releases/download/vVERSION/xgg-darwin-arm64.tar.gz
+
+# Extraer
+tar xzf xgg-darwin-arm64.tar.gz
+
+# Mover a PATH
+sudo mv xgg /usr/local/bin/
+```
+
+**Windows:**
+```powershell
+# Descargar el archivo (reemplaza VERSION con la versión deseada)
+# https://github.com/XungungoMarkets/xgg/releases/download/vVERSION/xgg-windows-amd64.zip
+
+# Extraer y mover a una carpeta en tu PATH
+```
+
+**Verificar checksums (opcional):**
+```bash
+sha256sum -c xgg-linux-amd64.tar.gz.sha256
+```
+
+### Desde Go
 
 ```bash
 go install github.com/XungungoMarkets/xgg@latest
