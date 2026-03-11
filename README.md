@@ -3,83 +3,83 @@
 [![Go Version](https://img.shields.io/badge/Go-1.26+-00ADD8?style=flat&logo=go)](https://golang.org)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-**Xungungo-CLI** es una herramienta de línea de comandos escrita en Go para acceder a datos financieros en tiempo real. Cotizaciones de acciones, datos históricos y más, directamente desde tu terminal.
+**Xungungo-CLI** is a command-line tool written in Go to access real-time financial data. Stock quotes, historical data, and more, directly from your terminal.
 
 ---
 
-## 📋 Índice
+## 📋 Table of Contents
 
-- [Características](#características)
-- [Instalación](#instalación)
-- [Uso](#uso)
-- [Comandos](#comandos)
-- [Requisitos](#requisitos)
-- [Licencia](#licencia)
-
----
-
-## ✨ Características
-
-- 📊 **Cotizaciones en tiempo real**: Obtén precios actuales de cualquier acción
-- 📈 **Datos históricos**: Accede a datos OHLCV (Open, High, Low, Close, Volume)
-- 🎨 **Interfaz visual**: Colores y formateo elegante en la terminal
-- ⚡ **Rápido**: Múltiples símbolos en una sola solicitud
-- 📅 **Periodos configurables**: 5 días, 1 mes, 3 meses, 6 meses, 1 año, 5 años
+- [Features](#features)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Commands](#commands)
+- [Requirements](#requirements)
+- [License](#license)
 
 ---
 
-  ## 🔽 Instalación
+## ✨ Features
 
-### Desde GitHub Releases (Recomendado) ⭐
+- 📊 **Real-time quotes**: Get current prices for any stock
+- 📈 **Historical data**: Access OHLCV data (Open, High, Low, Close, Volume)
+- 🎨 **Visual interface**: Colors and elegant formatting in the terminal
+- ⚡ **Fast**: Multiple symbols in a single request
+- 📅 **Configurable periods**: 5 days, 1 month, 3 months, 6 months, 1 year, 5 years
 
-Descarga el binario pre-compilado para tu sistema operativo desde la página de [Releases](https://github.com/XungungoMarkets/xgg/releases).
+---
+
+  ## 🔽 Installation
+
+### From GitHub Releases (Recommended) ⭐
+
+Download the pre-compiled binary for your operating system from the [Releases](https://github.com/XungungoMarkets/xgg/releases) page.
 
 **Linux/macOS:**
 ```bash
-# Descargar el archivo (reemplaza VERSION con la versión deseada)
+# Download the file (replace VERSION with the desired version)
 wget https://github.com/XungungoMarkets/xgg/releases/download/vVERSION/xgg-linux-amd64.tar.gz
 
-# Extraer
+# Extract
 tar xzf xgg-linux-amd64.tar.gz
 
-# Mover a PATH
+# Move to PATH
 sudo mv xgg /usr/local/bin/
 ```
 
 **macOS (Apple Silicon):**
 ```bash
-# Descargar
+# Download
 wget https://github.com/XungungoMarkets/xgg/releases/download/vVERSION/xgg-darwin-arm64.tar.gz
 
-# Extraer
+# Extract
 tar xzf xgg-darwin-arm64.tar.gz
 
-# Mover a PATH
+# Move to PATH
 sudo mv xgg /usr/local/bin/
 ```
 
 **Windows:**
 ```powershell
-# Descargar el archivo (reemplaza VERSION con la versión deseada)
+# Download the file (replace VERSION with the desired version)
 # https://github.com/XungungoMarkets/xgg/releases/download/vVERSION/xgg-windows-amd64.zip
 
-# Extraer y mover a una carpeta en tu PATH
+# Extract and move to a folder in your PATH
 ```
 
-**Verificar checksums (opcional):**
+**Verify checksums (optional):**
 ```bash
 sha256sum -c xgg-linux-amd64.tar.gz.sha256
 ```
 
-### Desde Go
+### From Go
 
 ```bash
 go install github.com/XungungoMarkets/xgg@latest
 ```
 
-Esto instalará el binario `xgg` en tu `$GOPATH/bin`. Asegúrate de que esté en tu `$PATH`.
+This will install the `xgg` binary in your `$GOPATH/bin`. Make sure it's in your `$PATH`.
 
-### Desde Source
+### From Source
 
 ```bash
 git clone https://github.com/XungungoMarkets/xgg.git
@@ -87,44 +87,44 @@ cd xgg
 go build -o xgg
 ```
 
-Mueve el binario a tu PATH:
+Move the binary to your PATH:
 
 ```bash
 # Linux/macOS
 sudo mv xgg /usr/local/bin/
 
 # Windows
-# Mueve xgg.exe a una carpeta en tu PATH
+# Move xgg.exe to a folder in your PATH
 ```
 
 ---
 
-## 🚀 Uso
+## 🚀 Usage
 
-### Ver Ayuda
+### View Help
 
 ```bash
-# Ayuda general
+# General help
 xgg --help
 
-# Ayuda de comando específico
+# Specific command help
 xgg stock --help
 xgg history --help
 ```
 
 ---
 
-## 📖 Comandos
+## 📖 Commands
 
-### Cotizaciones en Vivo
+### Live Quotes
 
-Obtén el precio actual de una acción:
+Get the current price of a stock:
 
 ```bash
 xgg stock NVDA
 ```
 
-**Salida:**
+**Output:**
 ```
 ┌─────────────────────────────────────────┐
 │  NVDA - NVIDIA Corporation             │
@@ -133,21 +133,21 @@ xgg stock NVDA
 └─────────────────────────────────────────┘
 ```
 
-Obtén cotizaciones de múltiples acciones a la vez:
+Get quotes for multiple stocks at once:
 
 ```bash
 xgg stock NVDA AAPL TSLA MSFT GOOGL
 ```
 
-### Datos Históricos
+### Historical Data
 
-Obtén datos históricos del último mes (por defecto):
+Get historical data for the last month (default):
 
 ```bash
 xgg history NVDA
 ```
 
-**Salida:**
+**Output:**
 ```
   NVDA Historical Data
   Date          Open      High       Low     Close       Volume
@@ -158,33 +158,33 @@ xgg history NVDA
   ...
 ```
 
-Obtén datos históricos con un periodo específico:
+Get historical data with a specific period:
 
 ```bash
-# Últimos 5 días
+# Last 5 days
 xgg history NVDA --period 5d
 
-# Últimos 6 meses
+# Last 6 months
 xgg history AAPL --period 6m
 
-# Último año
+# Last year
 xgg history TSLA --period 1y
 
-# Últimos 5 años
+# Last 5 years
 xgg history MSFT --period 5y
 ```
 
-**Periodos disponibles:**
-- `5d` - Últimos 5 días
-- `1m` - Último mes (default)
-- `3m` - Últimos 3 meses
-- `6m` - Últimos 6 meses
-- `1y` - Último año
-- `5y` - Últimos 5 años
+**Available periods:**
+- `5d` - Last 5 days
+- `1m` - Last month (default)
+- `3m` - Last 3 months
+- `6m` - Last 6 months
+- `1y` - Last year
+- `5y` - Last 5 years
 
-### Formato Rápido
+### Quick Format
 
-Para obtener información sin los bordes decorativos, puedes redirigir la salida o usarla en scripts:
+To get information without decorative borders, you can redirect the output or use it in scripts:
 
 ```bash
 xgg stock NVDA | grep -E "NVDA|Price"
@@ -192,17 +192,17 @@ xgg stock NVDA | grep -E "NVDA|Price"
 
 ---
 
-## 🛠️ Requisitos
+## 🛠️ Requirements
 
-- **Go**: 1.26 o superior (solo para compilar desde source)
-- **Sistema Operativo**: Linux, macOS, Windows
-- **Conexión a Internet**: Requerida para obtener datos financieros
+- **Go**: 1.26 or higher (only for compiling from source)
+- **Operating System**: Linux, macOS, Windows
+- **Internet Connection**: Required to fetch financial data
 
 ---
 
-## 📝 Licencia
+## 📝 License
 
-Este proyecto está licenciado bajo la Licencia MIT.
+This project is licensed under the MIT License.
 
 ---
 
@@ -213,6 +213,6 @@ Este proyecto está licenciado bajo la Licencia MIT.
 
 ---
 
-**Hecho con ❤️ por Xungungo Markets**
+**Made with ❤️ by Xungungo Markets**
 
-*Accede a los mercados financieros desde tu terminal, fácil y rápido.*
+*Access financial markets from your terminal, easy and fast.*
