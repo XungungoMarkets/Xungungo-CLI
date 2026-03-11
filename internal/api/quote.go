@@ -11,22 +11,22 @@ import (
 )
 
 type StockQuote struct {
-	Symbol        string
-	Name          string
-	Price         float64
-	Change        float64
-	ChangePercent float64
-	Volume        int
-	MarketCap     int64
+	Symbol        string  `json:"symbol"`
+	Name          string  `json:"name"`
+	Price         float64 `json:"price"`
+	Change        float64 `json:"change"`
+	ChangePercent float64 `json:"change_percent"`
+	Volume        int     `json:"volume"`
+	MarketCap     int64   `json:"market_cap"`
 }
 
 type Bar struct {
-	Date   time.Time
-	Open   float64
-	High   float64
-	Low    float64
-	Close  float64
-	Volume int
+	Date   time.Time `json:"date"`
+	Open   float64   `json:"open"`
+	High   float64   `json:"high"`
+	Low    float64   `json:"low"`
+	Close  float64   `json:"close"`
+	Volume int       `json:"volume"`
 }
 
 func GetQuote(symbol string) (*StockQuote, error) {

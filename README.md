@@ -115,9 +115,63 @@ xgg history --help
 xgg technical --help
 ```
 
+### JSON Output
+
+All commands support JSON output format using the `--json` flag. This is useful for scripting, automation, or integrating with other tools.
+
+```bash
+# Stock quote in JSON
+xgg stock NVDA --json
+
+# Multiple stocks in JSON
+xgg stock NVDA AAPL TSLA --json
+
+# Historical data in JSON
+xgg history NVDA --json --period 1y
+
+# Technical analysis in JSON
+xgg technical NVDA --json --indicator rsi
+
+# Multiple indicators in JSON
+xgg technical NVDA --json --indicator rsi,macd,sma
+```
+
+**JSON Output Example (Stock):**
+```json
+{
+  "symbol": "NVDA",
+  "name": "NVIDIA Corporation",
+  "price": 186.03,
+  "change": 1.26,
+  "change_percent": 0.68,
+  "volume": 138663908,
+  "market_cap": 0
+}
+```
+
+**JSON Output Example (Technical):**
+```json
+[
+  {
+    "symbol": "NVDA",
+    "indicator": "RSI(14)",
+    "value": 51.47,
+    "signal": "neutral"
+  },
+  {
+    "symbol": "NVDA",
+    "indicator": "MACD(12,26,9)",
+    "macd": -0.70,
+    "signal": -0.50,
+    "histogram": -0.20,
+    "signal_type": "bearish"
+  }
+]
+```
+
 ---
 
-## 📖 Commands
+## � Commands
 
 ### Live Quotes
 

@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"math"
 	"strings"
@@ -20,7 +21,8 @@ var technicalCmd = &cobra.Command{
 	Example: `  xgg technical NVDA
   xgg technical NVDA --indicator rsi --period 1m
   xgg technical NVDA --indicator rsi,macd --period 3m
-  xgg technical NVDA --indicator all --period 3m`,
+  xgg technical NVDA --indicator all --period 3m
+  xgg technical NVDA --json`,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		bars, err := api.GetHistory(args[0], technicalPeriod)
@@ -45,31 +47,71 @@ var technicalCmd = &cobra.Command{
 			"bb":   calculateBollingerBands,
 		}
 
-		// Execute each indicator
-		for i, ind := range indicators {
-			ind = strings.TrimSpace(ind)
+		if JSONOutput {
+			// JSON output mode
+			var results []interface{}
 
-			if ind == "all" {
-				// If "all" is specified, run all indicators
-				indicatorFuncs["rsi"](args[0], bars)
-				fmt.Println()
-				indicatorFuncs["macd"](args[0], bars)
-				fmt.Println()
-				indicatorFuncs["sma"](args[0], bars)
-				fmt.Println()
-				indicatorFuncs["ema"](args[0], bars)
-				fmt.Println()
-				indicatorFuncs["bb"](args[0], bars)
-				break
+			for _, ind := range indicators {
+				ind = strings.TrimSpace(ind)
+
+				if ind == "all" {
+					// If "all" is specified, get all indicators
+					results = append(results, getRSIData(args[0], bars))
+					results = append(results, getMACDData(args[0], bars))
+					results = append(results, getSMAData(args[0], bars))
+					results = append(results, getEMAData(args[0], bars))
+					results = append(results, getBollingerBandsData(args[0], bars))
+					break
+				}
+
+				switch ind {
+				case "rsi":
+					results = append(results, getRSIData(args[0], bars))
+				case "macd":
+					results = append(results, getMACDData(args[0], bars))
+				case "sma":
+					results = append(results, getSMAData(args[0], bars))
+				case "ema":
+					results = append(results, getEMAData(args[0], bars))
+				case "bb":
+					results = append(results, getBollingerBandsData(args[0], bars))
+				default:
+					return fmt.Errorf("unknown indicator: %s. Use: rsi, macd, sma, ema, bb, or all", ind)
+				}
 			}
 
-			if fn, exists := indicatorFuncs[ind]; exists {
-				if i > 0 {
+			jsonData, err := json.MarshalIndent(results, "", "  ")
+			if err != nil {
+				return fmt.Errorf("error marshaling JSON: %w", err)
+			}
+			fmt.Println(string(jsonData))
+		} else {
+			// Human-readable output mode
+			for i, ind := range indicators {
+				ind = strings.TrimSpace(ind)
+
+				if ind == "all" {
+					// If "all" is specified, run all indicators
+					indicatorFuncs["rsi"](args[0], bars)
 					fmt.Println()
+					indicatorFuncs["macd"](args[0], bars)
+					fmt.Println()
+					indicatorFuncs["sma"](args[0], bars)
+					fmt.Println()
+					indicatorFuncs["ema"](args[0], bars)
+					fmt.Println()
+					indicatorFuncs["bb"](args[0], bars)
+					break
 				}
-				fn(args[0], bars)
-			} else {
-				return fmt.Errorf("unknown indicator: %s. Use: rsi, macd, sma, ema, bb, or all", ind)
+
+				if fn, exists := indicatorFuncs[ind]; exists {
+					if i > 0 {
+						fmt.Println()
+					}
+					fn(args[0], bars)
+				} else {
+					return fmt.Errorf("unknown indicator: %s. Use: rsi, macd, sma, ema, bb, or all", ind)
+				}
 			}
 		}
 
@@ -77,10 +119,18 @@ var technicalCmd = &cobra.Command{
 	},
 }
 
+// RSI functions
 func calculateRSI(symbol string, bars []api.Bar) {
-	if len(bars) < 14 {
-		fmt.Printf("⚠ Need at least 14 data points for RSI calculation (have %d)\n", len(bars))
+	data := getRSIData(symbol, bars)
+	if data == nil {
 		return
+	}
+	printRSIHumanReadable(data)
+}
+
+func getRSIData(symbol string, bars []api.Bar) *api.RSIOutput {
+	if len(bars) < 14 {
+		return nil
 	}
 
 	closes := make([]float64, len(bars))
@@ -89,28 +139,53 @@ func calculateRSI(symbol string, bars []api.Bar) {
 	}
 
 	rsi := talib.Rsi(closes, 14)
-
 	lastRSI := rsi[len(rsi)-1]
-	fmt.Printf("📊 %s - RSI (14)\n", symbol)
+
+	var signal string
+	if lastRSI > 70 {
+		signal = "overbought"
+	} else if lastRSI < 30 {
+		signal = "oversold"
+	} else {
+		signal = "neutral"
+	}
+
+	return &api.RSIOutput{
+		Symbol:    symbol,
+		Indicator: "RSI(14)",
+		Value:     lastRSI,
+		Signal:    signal,
+	}
+}
+
+func printRSIHumanReadable(data *api.RSIOutput) {
+	fmt.Printf("📊 %s - RSI (14)\n", data.Symbol)
 	fmt.Printf("┌─────────────────────────────┐\n")
-	fmt.Printf("│ Current RSI: %7.2f       │\n", lastRSI)
+	fmt.Printf("│ Current RSI: %7.2f       │\n", data.Value)
 	fmt.Printf("└─────────────────────────────┘\n")
 	fmt.Println()
 
-	// RSI Analysis
-	if lastRSI > 70 {
+	if data.Signal == "overbought" {
 		fmt.Println("🔴 Overbought - Potential sell signal")
-	} else if lastRSI < 30 {
+	} else if data.Signal == "oversold" {
 		fmt.Println("🟢 Oversold - Potential buy signal")
 	} else {
 		fmt.Println("⚪ Neutral zone")
 	}
 }
 
+// MACD functions
 func calculateMACD(symbol string, bars []api.Bar) {
-	if len(bars) < 26 {
-		fmt.Printf("⚠ Need at least 26 data points for MACD calculation (have %d)\n", len(bars))
+	data := getMACDData(symbol, bars)
+	if data == nil {
 		return
+	}
+	printMACDHumanReadable(data)
+}
+
+func getMACDData(symbol string, bars []api.Bar) *api.MACDOutput {
+	if len(bars) < 26 {
+		return nil
 	}
 
 	closes := make([]float64, len(bars))
@@ -124,28 +199,55 @@ func calculateMACD(symbol string, bars []api.Bar) {
 	lastSignal := signal[len(signal)-1]
 	lastHist := hist[len(hist)-1]
 
-	fmt.Printf("📊 %s - MACD (12, 26, 9)\n", symbol)
+	var signalType string
+	if lastMACD > lastSignal && lastHist > 0 {
+		signalType = "bullish"
+	} else if lastMACD < lastSignal && lastHist < 0 {
+		signalType = "bearish"
+	} else {
+		signalType = "neutral"
+	}
+
+	return &api.MACDOutput{
+		Symbol:     symbol,
+		Indicator:  "MACD(12,26,9)",
+		MACD:       lastMACD,
+		Signal:     lastSignal,
+		Histogram:  lastHist,
+		SignalType: signalType,
+	}
+}
+
+func printMACDHumanReadable(data *api.MACDOutput) {
+	fmt.Printf("📊 %s - MACD (12, 26, 9)\n", data.Symbol)
 	fmt.Printf("┌─────────────────────────────┐\n")
-	fmt.Printf("│ MACD Line:  %7.2f       │\n", lastMACD)
-	fmt.Printf("│ Signal Line:%7.2f       │\n", lastSignal)
-	fmt.Printf("│ Histogram:  %7.2f       │\n", lastHist)
+	fmt.Printf("│ MACD Line:  %7.2f       │\n", data.MACD)
+	fmt.Printf("│ Signal Line:%7.2f       │\n", data.Signal)
+	fmt.Printf("│ Histogram:  %7.2f       │\n", data.Histogram)
 	fmt.Printf("└─────────────────────────────┘\n")
 	fmt.Println()
 
-	// MACD Analysis
-	if lastMACD > lastSignal && lastHist > 0 {
+	if data.SignalType == "bullish" {
 		fmt.Println("🟢 Bullish - Buy signal")
-	} else if lastMACD < lastSignal && lastHist < 0 {
+	} else if data.SignalType == "bearish" {
 		fmt.Println("🔴 Bearish - Sell signal")
 	} else {
 		fmt.Println("⚪ No clear signal")
 	}
 }
 
+// SMA functions
 func calculateSMA(symbol string, bars []api.Bar) {
-	if len(bars) < 20 {
-		fmt.Printf("⚠ Need at least 20 data points for SMA calculation (have %d)\n", len(bars))
+	data := getSMAData(symbol, bars)
+	if data == nil {
 		return
+	}
+	printSMAHumanReadable(data)
+}
+
+func getSMAData(symbol string, bars []api.Bar) *api.SMAOutput {
+	if len(bars) < 20 {
+		return nil
 	}
 
 	closes := make([]float64, len(bars))
@@ -163,30 +265,57 @@ func calculateSMA(symbol string, bars []api.Bar) {
 		lastSMA50 = sma50[len(sma50)-1]
 	}
 
-	fmt.Printf("📊 %s - Simple Moving Averages\n", symbol)
+	var trend string
+	if currentPrice > lastSMA20 && lastSMA20 > lastSMA50 {
+		trend = "uptrend"
+	} else if currentPrice < lastSMA20 && lastSMA20 < lastSMA50 {
+		trend = "downtrend"
+	} else {
+		trend = "consolidation"
+	}
+
+	return &api.SMAOutput{
+		Symbol:       symbol,
+		Indicator:    "SMA(20,50)",
+		CurrentPrice: currentPrice,
+		SMA20:        lastSMA20,
+		SMA50:        lastSMA50,
+		Trend:        trend,
+	}
+}
+
+func printSMAHumanReadable(data *api.SMAOutput) {
+	fmt.Printf("📊 %s - Simple Moving Averages\n", data.Symbol)
 	fmt.Printf("┌─────────────────────────────┐\n")
-	fmt.Printf("│ Current Price: $%7.2f    │\n", currentPrice)
-	fmt.Printf("│ SMA 20:        $%7.2f    │\n", lastSMA20)
-	if !math.IsNaN(lastSMA50) {
-		fmt.Printf("│ SMA 50:        $%7.2f    │\n", lastSMA50)
+	fmt.Printf("│ Current Price: $%7.2f    │\n", data.CurrentPrice)
+	fmt.Printf("│ SMA 20:        $%7.2f    │\n", data.SMA20)
+	if !math.IsNaN(data.SMA50) {
+		fmt.Printf("│ SMA 50:        $%7.2f    │\n", data.SMA50)
 	}
 	fmt.Printf("└─────────────────────────────┘\n")
 	fmt.Println()
 
-	// SMA Analysis
-	if currentPrice > lastSMA20 && lastSMA20 > lastSMA50 {
+	if data.Trend == "uptrend" {
 		fmt.Println("🟢 Strong uptrend - Price above SMA20, SMA20 above SMA50")
-	} else if currentPrice < lastSMA20 && lastSMA20 < lastSMA50 {
+	} else if data.Trend == "downtrend" {
 		fmt.Println("🔴 Strong downtrend - Price below SMA20, SMA20 below SMA50")
 	} else {
 		fmt.Println("⚪ Consolidation or weak trend")
 	}
 }
 
+// EMA functions
 func calculateEMA(symbol string, bars []api.Bar) {
-	if len(bars) < 12 {
-		fmt.Printf("⚠ Need at least 12 data points for EMA calculation (have %d)\n", len(bars))
+	data := getEMAData(symbol, bars)
+	if data == nil {
 		return
+	}
+	printEMAHumanReadable(data)
+}
+
+func getEMAData(symbol string, bars []api.Bar) *api.EMAOutput {
+	if len(bars) < 12 {
+		return nil
 	}
 
 	closes := make([]float64, len(bars))
@@ -201,28 +330,55 @@ func calculateEMA(symbol string, bars []api.Bar) {
 	lastEMA12 := ema12[len(ema12)-1]
 	lastEMA26 := ema26[len(ema26)-1]
 
-	fmt.Printf("📊 %s - Exponential Moving Averages\n", symbol)
+	var trend string
+	if lastEMA12 > lastEMA26 {
+		trend = "bullish"
+	} else if lastEMA12 < lastEMA26 {
+		trend = "bearish"
+	} else {
+		trend = "neutral"
+	}
+
+	return &api.EMAOutput{
+		Symbol:       symbol,
+		Indicator:    "EMA(12,26)",
+		CurrentPrice: currentPrice,
+		EMA12:        lastEMA12,
+		EMA26:        lastEMA26,
+		Trend:        trend,
+	}
+}
+
+func printEMAHumanReadable(data *api.EMAOutput) {
+	fmt.Printf("📊 %s - Exponential Moving Averages\n", data.Symbol)
 	fmt.Printf("┌─────────────────────────────┐\n")
-	fmt.Printf("│ Current Price: $%7.2f    │\n", currentPrice)
-	fmt.Printf("│ EMA 12:        $%7.2f    │\n", lastEMA12)
-	fmt.Printf("│ EMA 26:        $%7.2f    │\n", lastEMA26)
+	fmt.Printf("│ Current Price: $%7.2f    │\n", data.CurrentPrice)
+	fmt.Printf("│ EMA 12:        $%7.2f    │\n", data.EMA12)
+	fmt.Printf("│ EMA 26:        $%7.2f    │\n", data.EMA26)
 	fmt.Printf("└─────────────────────────────┘\n")
 	fmt.Println()
 
-	// EMA Analysis
-	if lastEMA12 > lastEMA26 {
+	if data.Trend == "bullish" {
 		fmt.Println("🟢 Bullish - EMA12 above EMA26")
-	} else if lastEMA12 < lastEMA26 {
+	} else if data.Trend == "bearish" {
 		fmt.Println("🔴 Bearish - EMA12 below EMA26")
 	} else {
 		fmt.Println("⚪ Neutral")
 	}
 }
 
+// Bollinger Bands functions
 func calculateBollingerBands(symbol string, bars []api.Bar) {
-	if len(bars) < 20 {
-		fmt.Printf("⚠ Need at least 20 data points for Bollinger Bands calculation (have %d)\n", len(bars))
+	data := getBollingerBandsData(symbol, bars)
+	if data == nil {
 		return
+	}
+	printBollingerBandsHumanReadable(data)
+}
+
+func getBollingerBandsData(symbol string, bars []api.Bar) *api.BollingerBandsOutput {
+	if len(bars) < 20 {
+		return nil
 	}
 
 	closes := make([]float64, len(bars))
@@ -237,19 +393,39 @@ func calculateBollingerBands(symbol string, bars []api.Bar) {
 	lastMiddle := middle[len(middle)-1]
 	lastLower := lower[len(lower)-1]
 
-	fmt.Printf("📊 %s - Bollinger Bands (20, 2)\n", symbol)
+	var position string
+	if currentPrice >= lastUpper {
+		position = "above_upper"
+	} else if currentPrice <= lastLower {
+		position = "below_lower"
+	} else {
+		position = "within_bands"
+	}
+
+	return &api.BollingerBandsOutput{
+		Symbol:       symbol,
+		Indicator:    "Bollinger Bands(20,2)",
+		Upper:        lastUpper,
+		Middle:       lastMiddle,
+		Lower:        lastLower,
+		CurrentPrice: currentPrice,
+		Position:     position,
+	}
+}
+
+func printBollingerBandsHumanReadable(data *api.BollingerBandsOutput) {
+	fmt.Printf("📊 %s - Bollinger Bands (20, 2)\n", data.Symbol)
 	fmt.Printf("┌─────────────────────────────┐\n")
-	fmt.Printf("│ Upper Band:   $%7.2f    │\n", lastUpper)
-	fmt.Printf("│ Middle (SMA):$%7.2f    │\n", lastMiddle)
-	fmt.Printf("│ Lower Band:   $%7.2f    │\n", lastLower)
-	fmt.Printf("│ Current Price:$%7.2f    │\n", currentPrice)
+	fmt.Printf("│ Upper Band:   $%7.2f    │\n", data.Upper)
+	fmt.Printf("│ Middle (SMA):$%7.2f    │\n", data.Middle)
+	fmt.Printf("│ Lower Band:   $%7.2f    │\n", data.Lower)
+	fmt.Printf("│ Current Price:$%7.2f    │\n", data.CurrentPrice)
 	fmt.Printf("└─────────────────────────────┘\n")
 	fmt.Println()
 
-	// Bollinger Bands Analysis
-	if currentPrice >= lastUpper {
+	if data.Position == "above_upper" {
 		fmt.Println("🔴 Near or above upper band - Potential reversal or breakout")
-	} else if currentPrice <= lastLower {
+	} else if data.Position == "below_lower" {
 		fmt.Println("🟢 Near or below lower band - Potential reversal or breakdown")
 	} else {
 		fmt.Println("⚪ Price within bands - Normal trading range")
