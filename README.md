@@ -22,6 +22,7 @@
 
 - 📊 **Real-time quotes**: Get current prices for any stock
 - 📈 **Historical data**: Access OHLCV data (Open, High, Low, Close, Volume)
+- 📉 **Technical analysis**: RSI, MACD, SMA, EMA, Bollinger Bands
 - 🎨 **Visual interface**: Colors and elegant formatting in terminal
 - ⚡ **Fast**: Multiple symbols in a single request
 - 📅 **Configurable periods**: 5 days, 1 month, 3 months, 6 months, 1 year, 5 years
@@ -111,6 +112,7 @@ xgg --help
 # Specific command help
 xgg stock --help
 xgg history --help
+xgg technical --help
 ```
 
 ---
@@ -182,6 +184,78 @@ xgg history MSFT --period 5y
 - `6m` - Last 6 months
 - `1y` - Last year
 - `5y` - Last 5 years
+
+### Technical Analysis
+
+Calculate and display technical analysis indicators for a stock:
+
+```bash
+xgg technical NVDA
+```
+
+**Output (RSI):**
+```
+📊 NVDA - RSI (14)
+┌─────────────────────────────┐
+│ Current RSI:   65.23       │
+└─────────────────────────────┘
+
+⚪ Neutral zone
+```
+
+**Output (MACD):**
+```
+📊 NVDA - MACD (12, 26, 9)
+┌─────────────────────────────┐
+│ MACD Line:    12.34       │
+│ Signal Line:  10.56       │
+│ Histogram:     1.78       │
+└─────────────────────────────┘
+
+🟢 Bullish - Buy signal
+```
+
+Get a specific indicator:
+
+```bash
+# RSI (Relative Strength Index)
+xgg technical NVDA --indicator rsi
+
+# MACD (Moving Average Convergence Divergence)
+xgg technical NVDA --indicator macd
+
+# SMA (Simple Moving Average)
+xgg technical NVDA --indicator sma
+
+# EMA (Exponential Moving Average)
+xgg technical NVDA --indicator ema
+
+# Bollinger Bands
+xgg technical NVDA --indicator bb
+
+# All indicators
+xgg technical NVDA --indicator all
+```
+
+Use different time periods:
+
+```bash
+xgg technical NVDA --indicator rsi --period 1y
+```
+
+**Available indicators:**
+- `rsi` - Relative Strength Index (14 period)
+- `macd` - Moving Average Convergence Divergence (12, 26, 9)
+- `sma` - Simple Moving Averages (20 and 50 period)
+- `ema` - Exponential Moving Averages (12 and 26 period)
+- `bb` - Bollinger Bands (20 period, 2 standard deviations)
+- `all` - Display all indicators
+
+**Technical analysis includes:**
+- RSI: Overbought (>70) and oversold (<30) signals
+- MACD: Trend direction and momentum
+- SMA/EMA: Support, resistance, and trend identification
+- Bollinger Bands: Volatility and potential breakout points
 
 ### Quick Format
 
