@@ -232,6 +232,16 @@ xgg technical NVDA --indicator ema
 
 # Bollinger Bands
 xgg technical NVDA --indicator bb
+```
+
+**Multiple indicators at once:**
+
+```bash
+# Two indicators
+xgg technical NVDA --indicator rsi,macd
+
+# Three indicators
+xgg technical NVDA --indicator rsi,sma,ema
 
 # All indicators
 xgg technical NVDA --indicator all
@@ -241,6 +251,7 @@ Use different time periods:
 
 ```bash
 xgg technical NVDA --indicator rsi --period 1y
+xgg technical NVDA --indicator rsi,macd --period 3m
 ```
 
 **Available indicators:**
@@ -250,6 +261,8 @@ xgg technical NVDA --indicator rsi --period 1y
 - `ema` - Exponential Moving Averages (12 and 26 period)
 - `bb` - Bollinger Bands (20 period, 2 standard deviations)
 - `all` - Display all indicators
+
+**Note:** You can specify multiple indicators separated by commas (e.g., `rsi,macd,sma`).
 
 **Technical analysis includes:**
 - RSI: Overbought (>70) and oversold (<30) signals

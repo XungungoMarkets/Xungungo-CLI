@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"math"
+	"strings"
 
 	"github.com/XungungoMarkets/xgg/internal/api"
 	"github.com/markcheno/go-talib"
@@ -18,7 +19,8 @@ var technicalCmd = &cobra.Command{
 	Long:  "Calculate and display technical analysis indicators for a ticker symbol.",
 	Example: `  xgg technical NVDA
   xgg technical NVDA --indicator rsi --period 1m
-  xgg technical NVDA --indicator macd --period 3m`,
+  xgg technical NVDA --indicator rsi,macd --period 3m
+  xgg technical NVDA --indicator all --period 3m`,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		bars, err := api.GetHistory(args[0], technicalPeriod)
@@ -30,29 +32,45 @@ var technicalCmd = &cobra.Command{
 			return fmt.Errorf("not enough data points for technical analysis")
 		}
 
-		switch technicalIndicator {
-		case "rsi":
-			calculateRSI(args[0], bars)
-		case "macd":
-			calculateMACD(args[0], bars)
-		case "sma":
-			calculateSMA(args[0], bars)
-		case "ema":
-			calculateEMA(args[0], bars)
-		case "bb":
-			calculateBollingerBands(args[0], bars)
-		case "all":
-			calculateRSI(args[0], bars)
-			fmt.Println()
-			calculateMACD(args[0], bars)
-			fmt.Println()
-			calculateSMA(args[0], bars)
-			fmt.Println()
-			calculateEMA(args[0], bars)
-			fmt.Println()
-			calculateBollingerBands(args[0], bars)
-		default:
-			return fmt.Errorf("unknown indicator: %s. Use: rsi, macd, sma, ema, bb, or all", technicalIndicator)
+		// Parse indicators (comma-separated)
+		indicators := strings.Split(technicalIndicator, ",")
+
+		// Map of indicator functions
+		type indicatorFunc func(string, []api.Bar)
+		indicatorFuncs := map[string]indicatorFunc{
+			"rsi":  calculateRSI,
+			"macd": calculateMACD,
+			"sma":  calculateSMA,
+			"ema":  calculateEMA,
+			"bb":   calculateBollingerBands,
+		}
+
+		// Execute each indicator
+		for i, ind := range indicators {
+			ind = strings.TrimSpace(ind)
+
+			if ind == "all" {
+				// If "all" is specified, run all indicators
+				indicatorFuncs["rsi"](args[0], bars)
+				fmt.Println()
+				indicatorFuncs["macd"](args[0], bars)
+				fmt.Println()
+				indicatorFuncs["sma"](args[0], bars)
+				fmt.Println()
+				indicatorFuncs["ema"](args[0], bars)
+				fmt.Println()
+				indicatorFuncs["bb"](args[0], bars)
+				break
+			}
+
+			if fn, exists := indicatorFuncs[ind]; exists {
+				if i > 0 {
+					fmt.Println()
+				}
+				fn(args[0], bars)
+			} else {
+				return fmt.Errorf("unknown indicator: %s. Use: rsi, macd, sma, ema, bb, or all", ind)
+			}
 		}
 
 		return nil
@@ -240,6 +258,6 @@ func calculateBollingerBands(symbol string, bars []api.Bar) {
 
 func init() {
 	technicalCmd.Flags().StringVarP(&technicalPeriod, "period", "p", "1m", "Time period: 5d, 1m, 3m, 6m, 1y, 5y")
-	technicalCmd.Flags().StringVarP(&technicalIndicator, "indicator", "i", "rsi", "Indicator: rsi, macd, sma, ema, bb, all")
+	technicalCmd.Flags().StringVarP(&technicalIndicator, "indicator", "i", "rsi", "Indicator: rsi, macd, sma, ema, bb, all (comma-separated)")
 	rootCmd.AddCommand(technicalCmd)
 }
