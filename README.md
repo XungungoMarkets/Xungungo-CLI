@@ -32,12 +32,12 @@
 
 ### From GitHub Releases (Recommended) ⭐
 
-Download the pre-compiled binary for your operating system from the [Releases](https://github.com/XungungoMarkets/xgg/releases) page.
+Download the pre-compiled binary for your operating system from the [v0.1.0 Release](https://github.com/XungungoMarkets/Xungungo-CLI/releases/tag/v0.1.0) page.
 
 **Linux/macOS:**
 ```bash
-# Download the file (replace VERSION with the desired version)
-wget https://github.com/XungungoMarkets/xgg/releases/download/vVERSION/xgg-linux-amd64.tar.gz
+# Download the file
+wget https://github.com/XungungoMarkets/Xungungo-CLI/releases/download/v0.1.0/xgg-linux-amd64.tar.gz
 
 # Extract
 tar xzf xgg-linux-amd64.tar.gz
@@ -49,7 +49,7 @@ sudo mv xgg /usr/local/bin/
 **macOS (Apple Silicon):**
 ```bash
 # Download
-wget https://github.com/XungungoMarkets/xgg/releases/download/vVERSION/xgg-darwin-arm64.tar.gz
+wget https://github.com/XungungoMarkets/Xungungo-CLI/releases/download/v0.1.0/xgg-darwin-arm64.tar.gz
 
 # Extract
 tar xzf xgg-darwin-arm64.tar.gz
@@ -60,8 +60,8 @@ sudo mv xgg /usr/local/bin/
 
 **Windows:**
 ```powershell
-# Download the file (replace VERSION with the desired version)
-# https://github.com/XungungoMarkets/xgg/releases/download/vVERSION/xgg-windows-amd64.zip
+# Download the file
+# https://github.com/XungungoMarkets/Xungungo-CLI/releases/download/v0.1.0/xgg-windows-amd64.zip
 
 # Extract and move to a folder in your PATH
 ```
@@ -208,8 +208,9 @@ This project is licensed under the MIT License.
 
 ## 🔗 Links
 
-- [GitHub Repository](https://github.com/XungungoMarkets/xgg)
-- [Issues](https://github.com/XungungoMarkets/xgg/issues)
+- [GitHub Repository](https://github.com/XungungoMarkets/Xungungo-CLI)
+- [Issues](https://github.com/XungungoMarkets/Xungungo-CLI/issues)
+- [v0.1.0 Release](https://github.com/XungungoMarkets/Xungungo-CLI/releases/tag/v0.1.0)
 
 ---
 
