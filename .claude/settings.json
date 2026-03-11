@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(go mod:*)",
+      "Bash(go build:*)",
+      "Read(//d/Desarrollo/xgg-finance-go/**)",
+      "Bash(./xgg.exe stock:*)",
+      "Bash(./xgg.exe history:*)"
+    ]
+  }
+}
