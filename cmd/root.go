@@ -7,6 +7,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// Version is set at build time using -ldflags
+var Version = "dev"
+
 var rootCmd = &cobra.Command{
 	Use:   "xgg",
 	Short: "Xungungo CLI - Financial markets at your fingertips",

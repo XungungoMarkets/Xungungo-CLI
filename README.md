@@ -22,13 +22,14 @@
 
 - 📊 **Real-time quotes**: Get current prices for any stock
 - 📈 **Historical data**: Access OHLCV data (Open, High, Low, Close, Volume)
-- 🎨 **Visual interface**: Colors and elegant formatting in the terminal
+- 🎨 **Visual interface**: Colors and elegant formatting in terminal
 - ⚡ **Fast**: Multiple symbols in a single request
 - 📅 **Configurable periods**: 5 days, 1 month, 3 months, 6 months, 1 year, 5 years
+- 🔄 **Auto-updater**: Built-in update mechanism to keep xgg current
 
 ---
 
-  ## 🔽 Installation
+## 🔽 Installation
 
 ### From GitHub Releases (Recommended) ⭐
 
@@ -189,6 +190,55 @@ To get information without decorative borders, you can redirect the output or us
 ```bash
 xgg stock NVDA | grep -E "NVDA|Price"
 ```
+
+### Version & Updates
+
+Check the current version:
+
+```bash
+xgg version
+```
+
+**Output:**
+```
+📈 Xungungo CLI
+Version: 0.1.0
+GitHub: https://github.com/XungungoMarkets/Xungungo-CLI
+```
+
+Check if an update is available without installing:
+
+```bash
+xgg check-update
+```
+
+**Output:**
+```
+✓ You are using the latest version: 0.1.0
+```
+
+Or if an update is available:
+```
+⚠ A new version is available!
+  Current: 0.1.0
+  Latest:  0.2.0
+  Release:  https://github.com/XungungoMarkets/Xungungo-CLI/releases/download/v0.2.0/xgg-linux-amd64.tar.gz
+
+Run 'xgg update' to update to the latest version.
+```
+
+Update xgg to the latest version:
+
+```bash
+xgg update
+```
+
+The update command will:
+- Check for the latest release on GitHub
+- Show you the current and latest version
+- Ask for confirmation before downloading
+- Download and replace the binary automatically
+- Verify the download using checksums
 
 ---
 
