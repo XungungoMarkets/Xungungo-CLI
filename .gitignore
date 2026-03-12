@@ -1,33 +1,47 @@
-# Binaries for programs and plugins
+# Go binaries and shared objects
 *.exe
 *.exe~
 *.dll
 *.so
 *.dylib
+*.a
+
+# Project binaries
 xgg
 xgg.exe
 
-# Test binary, built with `go test -c`
+# Go test artifacts
 *.test
-
-# Output of the go coverage tool, specifically when used with LiteIDE
 *.out
+*.coverprofile
+cover.out
+coverage.out
+coverage.txt
+coverage.html
 
-# Dependency directories
+# Go profiling and benchmark artifacts
+*.prof
+*.pprof
+cpu.out
+mem.out
+
+# Build output directories
+bin/
+build/
+dist/
+
+# Local temp artifacts
+tmp/
+temp/
+*.tmp
+_tmp*/
+
+# Dependency/workspace artifacts
 vendor/
-
-# Go workspace file
 go.work
+go.work.sum
 
-# IDE specific files
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-.DS_Store
-
-# Environment variables
+# Environment files
 .env
 .env.local
 .env.*.local
@@ -35,22 +49,16 @@ go.work
 # Logs
 *.log
 
-# Temporary files
-tmp/
-temp/
-*.tmp
+# IDE/editor/system files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
 
-# Coverage reports
-coverage.txt
-coverage.html
-*.coverprofile
-
-# Build artifacts
-dist/
-build/
-bin/
-
-# Test artifacts
+# Test playground artifacts
 test-finance/test-finance
 test-finance/*.exe
 test-finance/*.test
