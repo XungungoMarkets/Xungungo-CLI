@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -20,9 +21,12 @@ var historyCmd = &cobra.Command{
   xgg history NVDA --json`,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		bars, err := api.GetHistory(args[0], historyPeriod)
+		bars, meta, err := api.ServiceHandle().GetHistory(context.Background(), args[0], historyPeriod)
 		if err != nil {
 			return fmt.Errorf("error fetching history for %s: %w", args[0], err)
+		}
+		if meta.FallbackUsed && !JSONOutput {
+			fmt.Fprintf(cmd.ErrOrStderr(), "Warning: falling back to %s for %s history (%v)\n", meta.ProviderUsed, args[0], meta.PrimaryErr)
 		}
 
 		if JSONOutput {

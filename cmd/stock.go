@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -19,16 +20,18 @@ var stockCmd = &cobra.Command{
 	Args: cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var quotes []*api.StockQuote
-		var symbols []string
+		service := api.ServiceHandle()
 
 		for _, symbol := range args {
-			q, err := api.GetQuote(symbol)
+			q, meta, err := service.GetQuote(context.Background(), symbol)
 			if err != nil {
 				fmt.Fprintf(cmd.ErrOrStderr(), "Error fetching %s: %v\n", symbol, err)
 				continue
 			}
+			if meta.FallbackUsed && !JSONOutput {
+				fmt.Fprintf(cmd.ErrOrStderr(), "Warning: falling back to %s for %s (%v)\n", meta.ProviderUsed, symbol, meta.PrimaryErr)
+			}
 			quotes = append(quotes, q)
-			symbols = append(symbols, symbol)
 		}
 
 		if len(quotes) == 0 {

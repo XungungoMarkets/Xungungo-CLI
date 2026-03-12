@@ -4,22 +4,22 @@ go 1.26.1
 
 require (
 	github.com/XungungoMarkets/xgg-finance-go v0.0.0-20260311174637-65bc3ed89cee
+	github.com/XungungoMarkets/xgg-nasdaq-go v0.0.0-20260312150930-c9b79a05ee32
+	github.com/blang/semver v3.5.1+incompatible
 	github.com/fatih/color v1.18.0
+	github.com/markcheno/go-talib v0.0.0-20250114000313-ec55a20c902f
+	github.com/rhysd/go-github-selfupdate v1.2.3
 	github.com/spf13/cobra v1.10.2
 )
 
 require (
-	github.com/blang/semver v3.5.1+incompatible // indirect
-	github.com/blang/semver/v4 v4.0.0 // indirect
 	github.com/golang/protobuf v1.3.2 // indirect
 	github.com/google/go-github/v30 v30.1.0 // indirect
 	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/inconshreveable/go-update v0.0.0-20160112193335-8152e7eb6ccf // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
-	github.com/markcheno/go-talib v0.0.0-20250114000313-ec55a20c902f // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
-	github.com/rhysd/go-github-selfupdate v1.2.3 // indirect
 	github.com/shopspring/decimal v0.0.0-20180709203117-cd690d0c9e24 // indirect
 	github.com/spf13/pflag v1.0.9 // indirect
 	github.com/tcnksm/go-gitconfig v0.1.2 // indirect

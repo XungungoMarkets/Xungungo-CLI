@@ -113,6 +113,7 @@ xgg --help
 xgg stock --help
 xgg history --help
 xgg technical --help
+xgg search --help
 ```
 
 ### JSON Output
@@ -134,6 +135,9 @@ xgg technical NVDA --json --indicator rsi
 
 # Multiple indicators in JSON
 xgg technical NVDA --json --indicator rsi,macd,sma
+
+# Symbol search in JSON
+xgg search NVDA --json
 ```
 
 **JSON Output Example (Stock):**
@@ -169,6 +173,41 @@ xgg technical NVDA --json --indicator rsi,macd,sma
 ]
 ```
 
+### Data Provider Configuration
+
+`xgg` now supports provider selection and Nasdaq runtime tuning with precedence:
+
+`flags > environment variables > defaults`
+
+```bash
+# Force Nasdaq provider
+xgg --provider nasdaq stock NVDA
+
+# Auto mode (Nasdaq primary + legacy fallback)
+xgg --provider auto history AAPL --period 1m
+
+# Force legacy provider
+xgg --provider legacy stock MSFT
+```
+
+Available global flags:
+
+- `--provider` (`auto`, `nasdaq`, `legacy`)
+- `--rate-limit` (requests per second)
+- `--max-retries`
+- `--retry-delay` (example: `2s`)
+- `--timeout` (example: `30s`)
+- `--watchlist-type` (example: `Rv`)
+
+Equivalent environment variables:
+
+- `XGG_PROVIDER`
+- `XGG_RATE_LIMIT`
+- `XGG_MAX_RETRIES`
+- `XGG_RETRY_DELAY`
+- `XGG_TIMEOUT`
+- `XGG_WATCHLIST_TYPE`
+
 ---
 
 ## � Commands
@@ -194,6 +233,16 @@ Get quotes for multiple stocks at once:
 
 ```bash
 xgg stock NVDA AAPL TSLA MSFT GOOGL
+```
+
+### Symbol Search
+
+Search symbols (stocks, ETFs, indices) using Nasdaq autosuggest:
+
+```bash
+xgg search NVDA
+xgg search Apple --limit 20
+xgg search semiconductors --json
 ```
 
 ### Historical Data
