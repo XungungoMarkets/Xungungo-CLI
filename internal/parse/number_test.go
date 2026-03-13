@@ -1,4 +1,4 @@
-package api
+package parse
 
 import "testing"
 
@@ -16,15 +16,15 @@ func TestParseFloat(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		got, err := parseFloat(tt.in)
+		got, err := ParseFloat(tt.in)
 		if tt.ok && err != nil {
-			t.Fatalf("parseFloat(%q) error = %v", tt.in, err)
+			t.Fatalf("ParseFloat(%q) error = %v", tt.in, err)
 		}
 		if !tt.ok && err == nil {
-			t.Fatalf("parseFloat(%q) expected error", tt.in)
+			t.Fatalf("ParseFloat(%q) expected error", tt.in)
 		}
 		if tt.ok && got != tt.want {
-			t.Fatalf("parseFloat(%q) = %v, want %v", tt.in, got, tt.want)
+			t.Fatalf("ParseFloat(%q) = %v, want %v", tt.in, got, tt.want)
 		}
 	}
 }
@@ -43,12 +43,12 @@ func TestParseInt64(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		got, err := parseInt64(tt.in)
+		got, err := ParseInt64(tt.in)
 		if err != nil {
-			t.Fatalf("parseInt64(%q) error = %v", tt.in, err)
+			t.Fatalf("ParseInt64(%q) error = %v", tt.in, err)
 		}
 		if got != tt.want {
-			t.Fatalf("parseInt64(%q) = %v, want %v", tt.in, got, tt.want)
+			t.Fatalf("ParseInt64(%q) = %v, want %v", tt.in, got, tt.want)
 		}
 	}
 }

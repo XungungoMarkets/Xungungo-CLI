@@ -1,33 +1,36 @@
-package api
+package provider
 
 import (
 	"context"
 	"errors"
 	"testing"
+
+	"github.com/XungungoMarkets/xgg/internal/config"
+	"github.com/XungungoMarkets/xgg/internal/market"
 )
 
 type mockProvider struct {
 	name    string
-	quote   *StockQuote
-	history []Bar
-	search  []SearchResult
+	quote   *market.StockQuote
+	history []market.Bar
+	search  []market.SearchResult
 	err     error
 }
 
 func (m *mockProvider) Name() string { return m.name }
-func (m *mockProvider) GetQuote(_ context.Context, _ string) (*StockQuote, error) {
+func (m *mockProvider) GetQuote(_ context.Context, _ string) (*market.StockQuote, error) {
 	if m.err != nil {
 		return nil, m.err
 	}
 	return m.quote, nil
 }
-func (m *mockProvider) GetHistory(_ context.Context, _, _ string) ([]Bar, error) {
+func (m *mockProvider) GetHistory(_ context.Context, _, _ string) ([]market.Bar, error) {
 	if m.err != nil {
 		return nil, m.err
 	}
 	return m.history, nil
 }
-func (m *mockProvider) Search(_ context.Context, _ string, _ int, _ bool) ([]SearchResult, error) {
+func (m *mockProvider) Search(_ context.Context, _ string, _ int, _ bool) ([]market.SearchResult, error) {
 	if m.err != nil {
 		return nil, m.err
 	}
@@ -36,9 +39,9 @@ func (m *mockProvider) Search(_ context.Context, _ string, _ int, _ bool) ([]Sea
 
 func TestServiceFallbackOnRecoverableError(t *testing.T) {
 	svc := &Service{
-		mode:    ProviderAuto,
-		primary: &mockProvider{name: "nasdaq", err: recoverableError("quote", errors.New("429"))},
-		fallback: &mockProvider{name: "legacy", quote: &StockQuote{
+		mode:    config.ProviderAuto,
+		primary: &mockProvider{name: "nasdaq", err: config.NewRecoverableError("quote", errors.New("429"))},
+		fallback: &mockProvider{name: "legacy", quote: &market.StockQuote{
 			Symbol: "AAPL",
 		}},
 	}
@@ -57,9 +60,9 @@ func TestServiceFallbackOnRecoverableError(t *testing.T) {
 
 func TestServiceNoFallbackOnNonRecoverableError(t *testing.T) {
 	svc := &Service{
-		mode:     ProviderAuto,
+		mode:     config.ProviderAuto,
 		primary:  &mockProvider{name: "nasdaq", err: errors.New("bad request")},
-		fallback: &mockProvider{name: "legacy", quote: &StockQuote{Symbol: "AAPL"}},
+		fallback: &mockProvider{name: "legacy", quote: &market.StockQuote{Symbol: "AAPL"}},
 	}
 
 	_, _, err := svc.GetQuote(context.Background(), "AAPL")
@@ -70,10 +73,10 @@ func TestServiceNoFallbackOnNonRecoverableError(t *testing.T) {
 
 func TestServiceSearchNasdaqMode(t *testing.T) {
 	svc := &Service{
-		mode: ProviderNasdaq,
+		mode: config.ProviderNasdaq,
 		primary: &mockProvider{
 			name: "nasdaq",
-			search: []SearchResult{
+			search: []market.SearchResult{
 				{Symbol: "NVDA", Name: "NVIDIA", Type: "stocks"},
 			},
 		},
@@ -94,7 +97,7 @@ func TestServiceSearchNasdaqMode(t *testing.T) {
 
 func TestServiceSearchLegacyMode(t *testing.T) {
 	svc := &Service{
-		mode:     ProviderLegacy,
+		mode:     config.ProviderLegacy,
 		primary:  &mockProvider{name: "nasdaq"},
 		fallback: &mockProvider{name: "legacy"},
 	}

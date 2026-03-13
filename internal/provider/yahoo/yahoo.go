@@ -1,4 +1,4 @@
-package api
+package yahoo
 
 import (
 	"context"
@@ -6,28 +6,29 @@ import (
 	"strings"
 	"time"
 
+	"github.com/XungungoMarkets/xgg/internal/market"
 	"github.com/XungungoMarkets/xgg-finance-go/chart"
 	"github.com/XungungoMarkets/xgg-finance-go/datetime"
 	"github.com/XungungoMarkets/xgg-finance-go/quote"
 )
 
-type legacyProvider struct{}
+type Provider struct{}
 
-func newLegacyProvider() MarketDataProvider {
-	return &legacyProvider{}
+func New() *Provider {
+	return &Provider{}
 }
 
-func (p *legacyProvider) Name() string {
-	return "legacy"
+func (p *Provider) Name() string {
+	return "yahoo-finance"
 }
 
-func (p *legacyProvider) GetQuote(_ context.Context, symbol string) (*StockQuote, error) {
+func (p *Provider) GetQuote(_ context.Context, symbol string) (*market.StockQuote, error) {
 	q, err := quote.Get(strings.ToUpper(symbol))
 	if err != nil {
 		return nil, fmt.Errorf("could not fetch quote for %s: %w", symbol, err)
 	}
 
-	return &StockQuote{
+	return &market.StockQuote{
 		Symbol:        q.Symbol,
 		Name:          q.ShortName,
 		Price:         q.RegularMarketPrice,
@@ -38,9 +39,9 @@ func (p *legacyProvider) GetQuote(_ context.Context, symbol string) (*StockQuote
 	}, nil
 }
 
-func (p *legacyProvider) GetHistory(_ context.Context, symbol string, period string) ([]Bar, error) {
+func (p *Provider) GetHistory(_ context.Context, symbol string, period string) ([]market.Bar, error) {
 	interval := datetime.OneDay
-	start, end := periodToRange(period)
+	start, end := market.PeriodToRange(period)
 
 	params := &chart.Params{
 		Symbol:   strings.ToUpper(symbol),
@@ -49,7 +50,7 @@ func (p *legacyProvider) GetHistory(_ context.Context, symbol string, period str
 	params.Start = datetime.FromUnix(start)
 	params.End = datetime.FromUnix(end)
 
-	var bars []Bar
+	var bars []market.Bar
 	iter := chart.Get(params)
 	for iter.Next() {
 		b := iter.Bar()
@@ -58,7 +59,7 @@ func (p *legacyProvider) GetHistory(_ context.Context, symbol string, period str
 		low, _ := b.Low.Float64()
 		close_, _ := b.Close.Float64()
 
-		bars = append(bars, Bar{
+		bars = append(bars, market.Bar{
 			Date:   time.Unix(int64(b.Timestamp), 0),
 			Open:   open,
 			High:   high,

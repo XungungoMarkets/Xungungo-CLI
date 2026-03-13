@@ -5,7 +5,24 @@
       "Bash(go build:*)",
       "Read(//d/Desarrollo/xgg-finance-go/**)",
       "Bash(./xgg.exe stock:*)",
-      "Bash(./xgg.exe history:*)"
+      "Bash(./xgg.exe history:*)",
+      "Bash(go test:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(curl -s \"https://raw.githubusercontent.com/go-analyze/charts/main/README.md\")",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(curl -s \"https://raw.githubusercontent.com/go-analyze/charts/main/render.go\")",
+      "Bash(curl -s \"https://raw.githubusercontent.com/go-analyze/charts/main/painter.go\")",
+      "Bash(curl -s \"https://raw.githubusercontent.com/go-analyze/charts/main/charts.go\")",
+      "Bash(curl -s \"https://raw.githubusercontent.com/go-analyze/charts/main/option.go\")",
+      "Bash(curl -s \"https://raw.githubusercontent.com/go-analyze/charts/main/line.go\")",
+      "Bash(curl -s \"https://raw.githubusercontent.com/go-analyze/charts/main/candlestick.go\")",
+      "Bash(curl -s \"https://raw.githubusercontent.com/go-analyze/charts/main\")",
+      "Bash(curl -s \"https://raw.githubusercontent.com/go-analyze/charts/main/bar.go\")",
+      "Bash(curl -s \"https://raw.githubusercontent.com/go-analyze/charts/main/types.go\")",
+      "Bash(curl -s \"https://api.github.com/repos/go-analyze/charts/contents\")",
+      "Read(//d/Desarrollo/charts/**)",
+      "Bash(go get:*)",
+      "Bash(go run:*)"
     ]
   }
 }

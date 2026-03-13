@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/XungungoMarkets/xgg/cmd"
-	"github.com/XungungoMarkets/xgg/internal/api"
+	"github.com/XungungoMarkets/xgg/internal/market"
 	"github.com/markcheno/go-talib"
 )
 
@@ -13,7 +13,7 @@ func TestGetRSIData(t *testing.T) {
 	tests := []struct {
 		name      string
 		symbol    string
-		bars      []api.Bar
+		bars      []market.Bar
 		wantNil   bool
 		wantValue float64
 		wantType  string
@@ -58,7 +58,7 @@ func TestGetMACDData(t *testing.T) {
 	tests := []struct {
 		name    string
 		symbol  string
-		bars    []api.Bar
+		bars    []market.Bar
 		wantNil bool
 	}{
 		{
@@ -100,7 +100,7 @@ func TestGetSMAData(t *testing.T) {
 	tests := []struct {
 		name    string
 		symbol  string
-		bars    []api.Bar
+		bars    []market.Bar
 		wantNil bool
 	}{
 		{
@@ -142,7 +142,7 @@ func TestGetEMAData(t *testing.T) {
 	tests := []struct {
 		name    string
 		symbol  string
-		bars    []api.Bar
+		bars    []market.Bar
 		wantNil bool
 	}{
 		{
@@ -184,7 +184,7 @@ func TestGetBollingerBandsData(t *testing.T) {
 	tests := []struct {
 		name    string
 		symbol  string
-		bars    []api.Bar
+		bars    []market.Bar
 		wantNil bool
 	}{
 		{
@@ -253,8 +253,8 @@ func TestEMATrend(t *testing.T) {
 }
 
 // Helper function to generate test bar data
-func generateBars(count int) []api.Bar {
-	bars := make([]api.Bar, count)
+func generateBars(count int) []market.Bar {
+	bars := make([]market.Bar, count)
 	basePrice := 100.0
 	baseDate := time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)
 
@@ -263,7 +263,7 @@ func generateBars(count int) []api.Bar {
 		change := float64(i%10-5) * 0.5 // -2.5 to +2.5
 		price := basePrice + float64(i)*0.1 + change
 
-		bars[i] = api.Bar{
+		bars[i] = market.Bar{
 			Date:   baseDate.AddDate(0, 0, i),
 			Open:   price - 0.5,
 			High:   price + 0.5,

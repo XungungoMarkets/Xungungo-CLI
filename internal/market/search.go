@@ -1,4 +1,4 @@
-package api
+package market
 
 // SearchResult represents a symbol search suggestion.
 type SearchResult struct {

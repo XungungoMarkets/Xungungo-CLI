@@ -1,4 +1,4 @@
-package api
+package market
 
 import (
 	"encoding/json"

@@ -1,4 +1,4 @@
-package api
+package nasdaq
 
 import (
 	"context"
@@ -12,11 +12,14 @@ import (
 	"sync"
 	"time"
 
+	"github.com/XungungoMarkets/xgg/internal/config"
+	"github.com/XungungoMarkets/xgg/internal/market"
+	"github.com/XungungoMarkets/xgg/internal/parse"
 	nasdaqapi "github.com/XungungoMarkets/xgg-nasdaq-go/nasdaq"
 )
 
-type nasdaqProvider struct {
-	cfg        RuntimeConfig
+type Provider struct {
+	cfg        config.RuntimeConfig
 	client     *nasdaqapi.Client
 	httpClient *http.Client
 
@@ -24,9 +27,9 @@ type nasdaqProvider struct {
 	nextReqUTC time.Time
 }
 
-func newNasdaqProvider(cfg RuntimeConfig) MarketDataProvider {
-	cfg = cfg.normalized()
-	return &nasdaqProvider{
+func New(cfg config.RuntimeConfig) *Provider {
+	cfg = cfg.Normalized()
+	return &Provider{
 		cfg: cfg,
 		client: nasdaqapi.NewClient(
 			nasdaqapi.WithRateLimit(cfg.RateLimit),
@@ -38,11 +41,11 @@ func newNasdaqProvider(cfg RuntimeConfig) MarketDataProvider {
 	}
 }
 
-func (p *nasdaqProvider) Name() string {
+func (p *Provider) Name() string {
 	return "nasdaq"
 }
 
-func (p *nasdaqProvider) GetQuote(ctx context.Context, symbol string) (*StockQuote, error) {
+func (p *Provider) GetQuote(ctx context.Context, symbol string) (*market.StockQuote, error) {
 	row, err := p.client.GetQuote(ctx, strings.ToUpper(symbol), nasdaqapi.SymbolTypeStock)
 	if err == nil {
 		quote, mapErr := mapQuoteRowToStockQuote(row, symbol)
@@ -64,12 +67,12 @@ func (p *nasdaqProvider) GetQuote(ctx context.Context, symbol string) (*StockQuo
 
 	quote, err := mapQuoteRowToStockQuote(row, symbol)
 	if err != nil {
-		return nil, recoverableError("nasdaq_quote_parse", err)
+		return nil, config.NewRecoverableError("nasdaq_quote_parse", err)
 	}
 	return quote, nil
 }
 
-func (p *nasdaqProvider) GetHistory(ctx context.Context, symbol string, period string) ([]Bar, error) {
+func (p *Provider) GetHistory(ctx context.Context, symbol string, period string) ([]market.Bar, error) {
 	startDate, endDate := periodToDateStrings(period)
 	u := url.URL{
 		Scheme: "https",
@@ -85,49 +88,49 @@ func (p *nasdaqProvider) GetHistory(ctx context.Context, symbol string, period s
 
 	raw, err := p.getWithRetry(ctx, u.String())
 	if err != nil {
-		return nil, recoverableError("nasdaq_history", err)
+		return nil, config.NewRecoverableError("nasdaq_history", err)
 	}
 
 	var resp historicalResponse
 	if err := json.Unmarshal(raw, &resp); err != nil {
-		return nil, recoverableError("nasdaq_history_parse_json", err)
+		return nil, config.NewRecoverableError("nasdaq_history_parse_json", err)
 	}
 	if resp.Status.RCode != 200 {
-		return nil, recoverableError("nasdaq_history_status", fmt.Errorf("status %d", resp.Status.RCode))
+		return nil, config.NewRecoverableError("nasdaq_history_status", fmt.Errorf("status %d", resp.Status.RCode))
 	}
 	if len(resp.Data.TradesTable.Rows) == 0 {
-		return nil, recoverableError("nasdaq_history_empty", fmt.Errorf("empty rows"))
+		return nil, config.NewRecoverableError("nasdaq_history_empty", fmt.Errorf("empty rows"))
 	}
 
-	bars := make([]Bar, 0, len(resp.Data.TradesTable.Rows))
+	bars := make([]market.Bar, 0, len(resp.Data.TradesTable.Rows))
 	for _, row := range resp.Data.TradesTable.Rows {
 		d, err := time.Parse("01/02/2006", strings.TrimSpace(row.Date))
 		if err != nil {
-			return nil, recoverableError("nasdaq_history_parse_date", err)
+			return nil, config.NewRecoverableError("nasdaq_history_parse_date", err)
 		}
 
-		open, err := parseFloat(row.Open)
+		open, err := parse.ParseFloat(row.Open)
 		if err != nil {
-			return nil, recoverableError("nasdaq_history_parse_open", err)
+			return nil, config.NewRecoverableError("nasdaq_history_parse_open", err)
 		}
-		high, err := parseFloat(row.High)
+		high, err := parse.ParseFloat(row.High)
 		if err != nil {
-			return nil, recoverableError("nasdaq_history_parse_high", err)
+			return nil, config.NewRecoverableError("nasdaq_history_parse_high", err)
 		}
-		low, err := parseFloat(row.Low)
+		low, err := parse.ParseFloat(row.Low)
 		if err != nil {
-			return nil, recoverableError("nasdaq_history_parse_low", err)
+			return nil, config.NewRecoverableError("nasdaq_history_parse_low", err)
 		}
-		closeVal, err := parseFloat(row.Close)
+		closeVal, err := parse.ParseFloat(row.Close)
 		if err != nil {
-			return nil, recoverableError("nasdaq_history_parse_close", err)
+			return nil, config.NewRecoverableError("nasdaq_history_parse_close", err)
 		}
-		vol, err := parseInt(row.Volume)
+		vol, err := parse.ParseInt(row.Volume)
 		if err != nil {
-			return nil, recoverableError("nasdaq_history_parse_volume", err)
+			return nil, config.NewRecoverableError("nasdaq_history_parse_volume", err)
 		}
 
-		bars = append(bars, Bar{
+		bars = append(bars, market.Bar{
 			Date:   d,
 			Open:   open,
 			High:   high,
@@ -143,10 +146,10 @@ func (p *nasdaqProvider) GetHistory(ctx context.Context, symbol string, period s
 	return bars, nil
 }
 
-func (p *nasdaqProvider) Search(ctx context.Context, query string, limit int, includeMarketData bool) ([]SearchResult, error) {
+func (p *Provider) Search(ctx context.Context, query string, limit int, includeMarketData bool) ([]market.SearchResult, error) {
 	resp, err := p.client.Search(ctx, strings.TrimSpace(query), limit, includeMarketData)
 	if err == nil && resp != nil {
-		results := make([]SearchResult, 0, len(resp.Data))
+		results := make([]market.SearchResult, 0, len(resp.Data))
 		for _, row := range resp.Data {
 			results = append(results, mapSearchSuggestion(row))
 		}
@@ -159,12 +162,12 @@ func (p *nasdaqProvider) Search(ctx context.Context, query string, limit int, in
 		return results, nil
 	}
 	if err != nil {
-		return nil, recoverableError("nasdaq_search", err)
+		return nil, config.NewRecoverableError("nasdaq_search", err)
 	}
-	return nil, recoverableError("nasdaq_search", directErr)
+	return nil, config.NewRecoverableError("nasdaq_search", directErr)
 }
 
-func mapQuoteRowToStockQuote(row *nasdaqapi.QuoteRow, fallbackSymbol string) (*StockQuote, error) {
+func mapQuoteRowToStockQuote(row *nasdaqapi.QuoteRow, fallbackSymbol string) (*market.StockQuote, error) {
 	if row == nil {
 		return nil, fmt.Errorf("nil quote row")
 	}
@@ -176,28 +179,28 @@ func mapQuoteRowToStockQuote(row *nasdaqapi.QuoteRow, fallbackSymbol string) (*S
 		return nil, fmt.Errorf("empty symbol")
 	}
 
-	price, err := parseFloat(row.LastSalePrice)
+	price, err := parse.ParseFloat(row.LastSalePrice)
 	if err != nil {
 		return nil, fmt.Errorf("parse price: %w", err)
 	}
-	change, err := parseFloat(row.NetChange)
+	change, err := parse.ParseFloat(row.NetChange)
 	if err != nil {
 		return nil, fmt.Errorf("parse change: %w", err)
 	}
-	changePct, err := parseFloat(row.PercentageChange)
+	changePct, err := parse.ParseFloat(row.PercentageChange)
 	if err != nil {
 		return nil, fmt.Errorf("parse change percent: %w", err)
 	}
-	volume, err := parseInt(row.Volume)
+	volume, err := parse.ParseInt(row.Volume)
 	if err != nil {
 		return nil, fmt.Errorf("parse volume: %w", err)
 	}
-	marketCap, err := parseInt64(row.MarketCap)
+	marketCap, err := parse.ParseInt64(row.MarketCap)
 	if err != nil {
 		return nil, fmt.Errorf("parse market cap: %w", err)
 	}
 
-	return &StockQuote{
+	return &market.StockQuote{
 		Symbol:        symbol,
 		Name:          strings.TrimSpace(row.Name),
 		Price:         price,
@@ -208,8 +211,8 @@ func mapQuoteRowToStockQuote(row *nasdaqapi.QuoteRow, fallbackSymbol string) (*S
 	}, nil
 }
 
-func mapSearchSuggestion(s nasdaqapi.SearchSuggestion) SearchResult {
-	return SearchResult{
+func mapSearchSuggestion(s nasdaqapi.SearchSuggestion) market.SearchResult {
+	return market.SearchResult{
 		Symbol:      strings.TrimSpace(s.Symbol),
 		Name:        strings.TrimSpace(s.Name),
 		Type:        strings.TrimSpace(s.Type),
@@ -217,7 +220,7 @@ func mapSearchSuggestion(s nasdaqapi.SearchSuggestion) SearchResult {
 	}
 }
 
-func (p *nasdaqProvider) searchViaAutosuggest(ctx context.Context, query string, limit int, includeMarketData bool) ([]SearchResult, error) {
+func (p *Provider) searchViaAutosuggest(ctx context.Context, query string, limit int, includeMarketData bool) ([]market.SearchResult, error) {
 	u := url.URL{
 		Scheme: "https",
 		Host:   "www.nasdaq.com",
@@ -260,7 +263,7 @@ func (p *nasdaqProvider) searchViaAutosuggest(ctx context.Context, query string,
 		return nil, fmt.Errorf("status %d", response.Status.RCode)
 	}
 
-	results := make([]SearchResult, 0, len(response.Data))
+	results := make([]market.SearchResult, 0, len(response.Data))
 	for _, row := range response.Data {
 		name := strings.TrimSpace(row.Metadata.Name)
 		if name == "" {
@@ -278,7 +281,7 @@ func (p *nasdaqProvider) searchViaAutosuggest(ctx context.Context, query string,
 			typ = typ + ":" + strings.TrimSpace(row.Metadata.SubDocType)
 		}
 
-		results = append(results, SearchResult{
+		results = append(results, market.SearchResult{
 			Symbol:      strings.TrimSpace(row.Metadata.Symbol),
 			Name:        name,
 			Type:        typ,
@@ -288,7 +291,7 @@ func (p *nasdaqProvider) searchViaAutosuggest(ctx context.Context, query string,
 	return results, nil
 }
 
-func (p *nasdaqProvider) getWithRetry(ctx context.Context, endpoint string) ([]byte, error) {
+func (p *Provider) getWithRetry(ctx context.Context, endpoint string) ([]byte, error) {
 	var lastErr error
 	retries := p.cfg.MaxRetries
 	if retries < 0 {
@@ -339,7 +342,7 @@ func (p *nasdaqProvider) getWithRetry(ctx context.Context, endpoint string) ([]b
 	return nil, lastErr
 }
 
-func (p *nasdaqProvider) waitRateLimit(ctx context.Context) error {
+func (p *Provider) waitRateLimit(ctx context.Context) error {
 	rate := p.cfg.RateLimit
 	if rate <= 0 {
 		rate = 1
@@ -405,7 +408,7 @@ type historicalResponse struct {
 	} `json:"data"`
 }
 
-func (p *nasdaqProvider) getQuoteViaWatchlist(ctx context.Context, symbol string) (*nasdaqapi.QuoteRow, error) {
+func (p *Provider) getQuoteViaWatchlist(ctx context.Context, symbol string) (*nasdaqapi.QuoteRow, error) {
 	u := url.URL{
 		Scheme: "https",
 		Host:   "api.nasdaq.com",

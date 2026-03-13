@@ -5,8 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/XungungoMarkets/xgg/internal/api"
-	"github.com/XungungoMarkets/xgg/internal/ui"
+	"github.com/XungungoMarkets/xgg/internal/market"
+	"github.com/XungungoMarkets/xgg/internal/output"
+	"github.com/XungungoMarkets/xgg/internal/provider"
 	"github.com/spf13/cobra"
 )
 
@@ -19,8 +20,8 @@ var stockCmd = &cobra.Command{
   xgg stock NVDA --json`,
 	Args: cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		var quotes []*api.StockQuote
-		service := api.ServiceHandle()
+		var quotes []*market.StockQuote
+		service := provider.ServiceHandle()
 
 		for _, symbol := range args {
 			q, meta, err := service.GetQuote(context.Background(), symbol)
@@ -58,7 +59,7 @@ var stockCmd = &cobra.Command{
 		} else {
 			// Output in human-readable format
 			for _, q := range quotes {
-				ui.PrintQuote(q)
+				output.PrintQuote(q)
 			}
 		}
 

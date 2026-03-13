@@ -1,4 +1,4 @@
-package api
+package analysis
 
 // Technical indicator structures for JSON output
 
@@ -17,7 +17,7 @@ type MACDOutput struct {
 	MACD       float64 `json:"macd"`
 	Signal     float64 `json:"signal"`
 	Histogram  float64 `json:"histogram"`
-	SignalType string  `json:"signal"` // "bullish", "bearish", "neutral"
+	SignalType string  `json:"signal_type"` // "bullish", "bearish", "neutral"
 }
 
 // SMAOutput represents SMA indicator output

@@ -13,6 +13,12 @@
 - [Installation](#installation)
 - [Usage](#usage)
 - [Commands](#commands)
+  - [Live Quotes](#live-quotes)
+  - [Symbol Search](#symbol-search)
+  - [Historical Data](#historical-data)
+  - [Chart Generation](#chart-generation)
+  - [Technical Analysis](#technical-analysis)
+  - [Version & Updates](#version--updates)
 - [Requirements](#requirements)
 - [License](#license)
 
@@ -23,6 +29,7 @@
 - 📊 **Real-time quotes**: Get current prices for any stock
 - 📈 **Historical data**: Access OHLCV data (Open, High, Low, Close, Volume)
 - 📉 **Technical analysis**: RSI, MACD, SMA, EMA, Bollinger Bands
+- 🖼️ **Chart generation**: Render line and candlestick charts as PNG images
 - 🎨 **Visual interface**: Colors and elegant formatting in terminal
 - ⚡ **Fast**: Multiple symbols in a single request
 - 📅 **Configurable periods**: 5 days, 1 month, 3 months, 6 months, 1 year, 5 years
@@ -112,6 +119,7 @@ xgg --help
 # Specific command help
 xgg stock --help
 xgg history --help
+xgg chart --help
 xgg technical --help
 xgg search --help
 ```
@@ -287,6 +295,43 @@ xgg history MSFT --period 5y
 - `6m` - Last 6 months
 - `1y` - Last year
 - `5y` - Last 5 years
+
+### Chart Generation
+
+Generate a price chart and save it as a PNG image:
+
+```bash
+xgg chart AAPL
+```
+
+This saves `aapl_chart.png` in the current directory and prints the path to stdout — useful for agents or scripts that need to attach or display the image.
+
+**Line chart (default):**
+```bash
+xgg chart NVDA
+xgg chart NVDA --period 3m
+xgg chart TSLA --output /tmp/tsla.png
+```
+
+**Candlestick (OHLC) chart:**
+```bash
+xgg chart NVDA --type candlestick
+xgg chart AAPL --type candlestick --period 6m
+```
+
+**Custom size and theme:**
+```bash
+xgg chart NVDA --width 1200 --height 600 --theme light
+xgg chart NVDA --theme vivid-dark
+```
+
+**Available flags:**
+- `--type` / `-t`: `line` (default), `candlestick`
+- `--period` / `-p`: `5d`, `1m` (default), `3m`, `6m`, `1y`, `5y`
+- `--output` / `-o`: output file path (default: `<symbol>_chart.png`)
+- `--width`: image width in pixels (default: `900`)
+- `--height`: image height in pixels (default: `500`)
+- `--theme`: `light`, `dark` (default), `vivid-light`, `vivid-dark`, `ant`, `grafana`
 
 ### Technical Analysis
 

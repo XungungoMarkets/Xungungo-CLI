@@ -1,4 +1,4 @@
-package api
+package market
 
 import (
 	"time"
@@ -23,7 +23,7 @@ type Bar struct {
 	Volume int       `json:"volume"`
 }
 
-func periodToRange(period string) (int, int) {
+func PeriodToRange(period string) (int, int) {
 	now := time.Now()
 	end := int(now.Unix())
 

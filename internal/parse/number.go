@@ -1,4 +1,4 @@
-package api
+package parse
 
 import (
 	"fmt"
@@ -7,8 +7,8 @@ import (
 	"strings"
 )
 
-func parseFloat(input string) (float64, error) {
-	clean := normalizeNumber(input)
+func ParseFloat(input string) (float64, error) {
+	clean := NormalizeNumber(input)
 	if clean == "" {
 		return 0, fmt.Errorf("empty numeric value")
 	}
@@ -19,15 +19,15 @@ func parseFloat(input string) (float64, error) {
 	return v, nil
 }
 
-func parseInt(input string) (int, error) {
-	v, err := parseInt64(input)
+func ParseInt(input string) (int, error) {
+	v, err := ParseInt64(input)
 	if err != nil {
 		return 0, err
 	}
 	return int(v), nil
 }
 
-func parseInt64(input string) (int64, error) {
+func ParseInt64(input string) (int64, error) {
 	raw := strings.TrimSpace(input)
 	if raw == "" || strings.EqualFold(raw, "n/a") || raw == "-" {
 		return 0, nil
@@ -50,14 +50,14 @@ func parseInt64(input string) (int64, error) {
 		raw = raw[:len(raw)-1]
 	}
 
-	base, err := parseFloat(raw)
+	base, err := ParseFloat(raw)
 	if err != nil {
 		return 0, err
 	}
 	return int64(base * multiplier), nil
 }
 
-func normalizeNumber(input string) string {
+func NormalizeNumber(input string) string {
 	s := strings.TrimSpace(input)
 	if s == "" || strings.EqualFold(s, "n/a") || s == "-" {
 		return ""

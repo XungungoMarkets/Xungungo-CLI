@@ -7,7 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/XungungoMarkets/xgg/internal/api"
+	"github.com/XungungoMarkets/xgg/internal/config"
+	"github.com/XungungoMarkets/xgg/internal/provider"
 	"github.com/spf13/cobra"
 )
 
@@ -35,7 +36,7 @@ var rootCmd = &cobra.Command{
 			}
 		}
 
-		api.ConfigureRuntime(resolveRuntimeConfig(cmd))
+		provider.ConfigureRuntime(resolveRuntimeConfig(cmd))
 	},
 }
 
@@ -61,12 +62,12 @@ func Execute() {
 	}
 }
 
-func resolveRuntimeConfig(cmd *cobra.Command) api.RuntimeConfig {
-	cfg := api.DefaultRuntimeConfig()
+func resolveRuntimeConfig(cmd *cobra.Command) config.RuntimeConfig {
+	cfg := config.DefaultRuntimeConfig()
 	flags := cmd.Root().PersistentFlags()
 
 	if v := strings.TrimSpace(os.Getenv("XGG_PROVIDER")); v != "" {
-		cfg.Provider = api.ProviderMode(strings.ToLower(v))
+		cfg.Provider = config.ProviderMode(strings.ToLower(v))
 	}
 	if v := strings.TrimSpace(os.Getenv("XGG_RATE_LIMIT")); v != "" {
 		if parsed, err := strconv.Atoi(v); err == nil {
@@ -93,7 +94,7 @@ func resolveRuntimeConfig(cmd *cobra.Command) api.RuntimeConfig {
 	}
 
 	if flags.Changed("provider") {
-		cfg.Provider = api.ProviderMode(strings.ToLower(strings.TrimSpace(providerMode)))
+		cfg.Provider = config.ProviderMode(strings.ToLower(strings.TrimSpace(providerMode)))
 	}
 	if flags.Changed("rate-limit") {
 		cfg.RateLimit = rateLimit

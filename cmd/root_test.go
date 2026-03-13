@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/XungungoMarkets/xgg/internal/api"
+	"github.com/XungungoMarkets/xgg/internal/config"
 	"github.com/spf13/cobra"
 )
 
@@ -30,7 +30,7 @@ func TestResolveRuntimeConfigEnv(t *testing.T) {
 
 	cmd := newTestRootCmd()
 	cfg := resolveRuntimeConfig(cmd)
-	if cfg.Provider != api.ProviderNasdaq || cfg.RateLimit != 1 || cfg.MaxRetries != 5 {
+	if cfg.Provider != config.ProviderNasdaq || cfg.RateLimit != 1 || cfg.MaxRetries != 5 {
 		t.Fatalf("unexpected config from env: %+v", cfg)
 	}
 	if cfg.RetryDelaySec != 3 || cfg.TimeoutSec != 40 || cfg.WatchlistType != "Rv" {
@@ -57,7 +57,7 @@ func TestResolveRuntimeConfigFlagsOverrideEnv(t *testing.T) {
 	}
 
 	cfg := resolveRuntimeConfig(cmd)
-	if cfg.Provider != api.ProviderNasdaq || cfg.RateLimit != 7 {
+	if cfg.Provider != config.ProviderNasdaq || cfg.RateLimit != 7 {
 		t.Fatalf("flags did not override env: %+v", cfg)
 	}
 	if cfg.RetryDelaySec != int((9*time.Second)/time.Second) || cfg.TimeoutSec != int((22*time.Second)/time.Second) {
@@ -80,7 +80,7 @@ func TestResolveRuntimeConfigDefaults(t *testing.T) {
 	_ = os.Unsetenv("XGG_PROVIDER")
 	cmd := newTestRootCmd()
 	cfg := resolveRuntimeConfig(cmd)
-	def := api.DefaultRuntimeConfig()
+	def := config.DefaultRuntimeConfig()
 	if cfg != def {
 		t.Fatalf("expected defaults %+v, got %+v", def, cfg)
 	}

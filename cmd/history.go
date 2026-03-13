@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/XungungoMarkets/xgg/internal/api"
-	"github.com/XungungoMarkets/xgg/internal/ui"
+	"github.com/XungungoMarkets/xgg/internal/output"
+	"github.com/XungungoMarkets/xgg/internal/provider"
 	"github.com/spf13/cobra"
 )
 
@@ -21,7 +21,7 @@ var historyCmd = &cobra.Command{
   xgg history NVDA --json`,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		bars, meta, err := api.ServiceHandle().GetHistory(context.Background(), args[0], historyPeriod)
+		bars, meta, err := provider.ServiceHandle().GetHistory(context.Background(), args[0], historyPeriod)
 		if err != nil {
 			return fmt.Errorf("error fetching history for %s: %w", args[0], err)
 		}
@@ -38,7 +38,7 @@ var historyCmd = &cobra.Command{
 			fmt.Println(string(jsonData))
 		} else {
 			// Output in human-readable format
-			ui.PrintHistory(args[0], bars)
+			output.PrintHistory(args[0], bars)
 		}
 
 		return nil

@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/XungungoMarkets/xgg/internal/api"
-	"github.com/XungungoMarkets/xgg/internal/ui"
+	"github.com/XungungoMarkets/xgg/internal/output"
+	"github.com/XungungoMarkets/xgg/internal/provider"
 	"github.com/spf13/cobra"
 )
 
@@ -22,7 +22,7 @@ var searchCmd = &cobra.Command{
   xgg search semiconductors --json`,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		results, _, err := api.ServiceHandle().Search(context.Background(), args[0], searchLimit, searchIncludeMarketData)
+		results, _, err := provider.ServiceHandle().Search(context.Background(), args[0], searchLimit, searchIncludeMarketData)
 		if err != nil {
 			return fmt.Errorf("error searching %q: %w", args[0], err)
 		}
@@ -36,7 +36,7 @@ var searchCmd = &cobra.Command{
 			return nil
 		}
 
-		ui.PrintSearchResults(args[0], results)
+		output.PrintSearchResults(args[0], results)
 		return nil
 	},
 }

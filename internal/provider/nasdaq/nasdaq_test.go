@@ -1,4 +1,4 @@
-package api
+package nasdaq
 
 import (
 	"testing"
