@@ -12,12 +12,14 @@ import (
 )
 
 var (
-	chartPeriod string
-	chartType   string
-	chartOutput string
-	chartWidth  int
-	chartHeight int
-	chartTheme  string
+	chartPeriod     string
+	chartType       string
+	chartOutput     string
+	chartWidth      int
+	chartHeight     int
+	chartTheme      string
+	chartInterval   string
+	chartIndicators string
 )
 
 var chartCmd = &cobra.Command{
@@ -26,7 +28,10 @@ var chartCmd = &cobra.Command{
 	Long:  "Fetch historical data and render a line or candlestick chart saved as a PNG file.",
 	Example: `  xgg chart AAPL
   xgg chart NVDA --type candlestick --period 3m
-  xgg chart TSLA --output /tmp/tsla.png --theme dark`,
+  xgg chart TSLA --period 1y --interval week --indicator sma20,sma50
+  xgg chart NVDA --type candlestick --period 6m --indicator bb
+  xgg chart MSFT --period 5y --interval month --type candlestick --indicator sma20,ema50
+  xgg chart AAPL --output /tmp/aapl.png --theme light`,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		symbol := strings.ToUpper(strings.TrimSpace(args[0]))
@@ -48,12 +53,14 @@ var chartCmd = &cobra.Command{
 			outPath = fmt.Sprintf("%s_chart.png", strings.ToLower(symbol))
 		}
 
+		interval := chart.ParseInterval(chartInterval)
+
 		var data []byte
 		switch strings.ToLower(chartType) {
 		case "candlestick", "candle", "ohlc":
-			data, err = chart.RenderCandlestick(symbol, bars, chartWidth, chartHeight, chartTheme)
+			data, err = chart.RenderCandlestick(symbol, bars, chartWidth, chartHeight, chartTheme, chartIndicators, interval)
 		default:
-			data, err = chart.RenderLine(symbol, bars, chartWidth, chartHeight, chartTheme)
+			data, err = chart.RenderLine(symbol, bars, chartWidth, chartHeight, chartTheme, chartIndicators, interval)
 		}
 		if err != nil {
 			return fmt.Errorf("error generating chart: %w", err)
@@ -69,11 +76,19 @@ var chartCmd = &cobra.Command{
 }
 
 func init() {
-	chartCmd.Flags().StringVarP(&chartPeriod, "period", "p", "1m", "Time period: 5d, 1m, 3m, 6m, 1y, 5y")
-	chartCmd.Flags().StringVarP(&chartType, "type", "t", "line", "Chart type: line, candlestick")
-	chartCmd.Flags().StringVarP(&chartOutput, "output", "o", "", "Output file path (default: <symbol>_chart.png)")
+	chartCmd.Flags().StringVarP(&chartPeriod, "period", "p", "1m",
+		"Time period: 1w, 2w, 5d, 1m, 2m, 3m, 6m, 9m, 1y, 2y, 3y, 5y, 10y, max")
+	chartCmd.Flags().StringVarP(&chartType, "type", "t", "line",
+		"Chart type: line, candlestick")
+	chartCmd.Flags().StringVarP(&chartInterval, "interval", "i", "day",
+		"Bar interval: day, week, month")
+	chartCmd.Flags().StringVarP(&chartOutput, "output", "o", "",
+		"Output file path (default: <symbol>_chart.png)")
 	chartCmd.Flags().IntVar(&chartWidth, "width", 900, "Chart width in pixels")
 	chartCmd.Flags().IntVar(&chartHeight, "height", 500, "Chart height in pixels")
-	chartCmd.Flags().StringVar(&chartTheme, "theme", "dark", "Color theme: light, dark, vivid-light, vivid-dark, ant, grafana")
+	chartCmd.Flags().StringVar(&chartTheme, "theme", "dark",
+		"Color theme: light, dark, vivid-light, vivid-dark, ant, grafana")
+	chartCmd.Flags().StringVar(&chartIndicators, "indicator", "",
+		"Overlay indicators (comma-separated): sma20, sma50, sma200, ema12, ema26, ema50, bb, linear, cubic")
 	rootCmd.AddCommand(chartCmd)
 }

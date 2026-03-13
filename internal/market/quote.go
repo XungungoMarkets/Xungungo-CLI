@@ -29,18 +29,34 @@ func PeriodToRange(period string) (int, int) {
 
 	var start time.Time
 	switch period {
+	case "1w":
+		start = now.AddDate(0, 0, -7)
+	case "2w":
+		start = now.AddDate(0, 0, -14)
 	case "5d":
 		start = now.AddDate(0, 0, -5)
 	case "1m":
 		start = now.AddDate(0, -1, 0)
+	case "2m":
+		start = now.AddDate(0, -2, 0)
 	case "3m":
 		start = now.AddDate(0, -3, 0)
 	case "6m":
 		start = now.AddDate(0, -6, 0)
+	case "9m":
+		start = now.AddDate(0, -9, 0)
 	case "1y":
 		start = now.AddDate(-1, 0, 0)
+	case "2y":
+		start = now.AddDate(-2, 0, 0)
+	case "3y":
+		start = now.AddDate(-3, 0, 0)
 	case "5y":
 		start = now.AddDate(-5, 0, 0)
+	case "10y":
+		start = now.AddDate(-10, 0, 0)
+	case "max":
+		start = now.AddDate(-20, 0, 0)
 	default:
 		start = now.AddDate(0, -1, 0)
 	}

@@ -372,18 +372,34 @@ func periodToDateStrings(period string) (start string, end string) {
 	now := time.Now()
 	var from time.Time
 	switch period {
+	case "1w":
+		from = now.AddDate(0, 0, -7)
+	case "2w":
+		from = now.AddDate(0, 0, -14)
 	case "5d":
 		from = now.AddDate(0, 0, -5)
 	case "1m":
 		from = now.AddDate(0, -1, 0)
+	case "2m":
+		from = now.AddDate(0, -2, 0)
 	case "3m":
 		from = now.AddDate(0, -3, 0)
 	case "6m":
 		from = now.AddDate(0, -6, 0)
+	case "9m":
+		from = now.AddDate(0, -9, 0)
 	case "1y":
 		from = now.AddDate(-1, 0, 0)
+	case "2y":
+		from = now.AddDate(-2, 0, 0)
+	case "3y":
+		from = now.AddDate(-3, 0, 0)
 	case "5y":
 		from = now.AddDate(-5, 0, 0)
+	case "10y":
+		from = now.AddDate(-10, 0, 0)
+	case "max":
+		from = now.AddDate(-20, 0, 0)
 	default:
 		from = now.AddDate(0, -1, 0)
 	}

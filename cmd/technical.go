@@ -15,6 +15,7 @@ import (
 
 var technicalPeriod string
 var technicalIndicator string
+var technicalInterval string
 
 var technicalCmd = &cobra.Command{
 	Use:   "technical [symbol]",
@@ -31,6 +32,8 @@ var technicalCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("error fetching history for %s: %w", args[0], err)
 		}
+
+		bars = market.ApplyInterval(bars, technicalInterval)
 
 		if len(bars) < 2 {
 			return fmt.Errorf("not enough data points for technical analysis")
@@ -197,7 +200,11 @@ func GetBollingerBandsData(symbol string, bars []market.Bar) *analysis.Bollinger
 }
 
 func init() {
-	technicalCmd.Flags().StringVarP(&technicalPeriod, "period", "p", "1m", "Time period: 5d, 1m, 3m, 6m, 1y, 5y")
-	technicalCmd.Flags().StringVarP(&technicalIndicator, "indicator", "i", "rsi", "Indicator: rsi, macd, sma, ema, bb, all (comma-separated)")
+	technicalCmd.Flags().StringVarP(&technicalPeriod, "period", "p", "1m",
+		"Time period: 1w, 2w, 5d, 1m, 2m, 3m, 6m, 9m, 1y, 2y, 3y, 5y, 10y, max")
+	technicalCmd.Flags().StringVarP(&technicalIndicator, "indicator", "i", "rsi",
+		"Indicator: rsi, macd, sma, ema, bb, all (comma-separated)")
+	technicalCmd.Flags().StringVar(&technicalInterval, "interval", "day",
+		"Bar interval: day, week, month")
 	rootCmd.AddCommand(technicalCmd)
 }
