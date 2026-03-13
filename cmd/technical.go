@@ -246,7 +246,7 @@ func calculateSMA(symbol string, bars []api.Bar) {
 }
 
 func getSMAData(symbol string, bars []api.Bar) *api.SMAOutput {
-	if len(bars) < 20 {
+	if len(bars) < 50 {
 		return nil
 	}
 
@@ -260,10 +260,7 @@ func getSMAData(symbol string, bars []api.Bar) *api.SMAOutput {
 
 	currentPrice := bars[len(bars)-1].Close
 	lastSMA20 := sma20[len(sma20)-1]
-	var lastSMA50 float64
-	if len(sma50) > 0 {
-		lastSMA50 = sma50[len(sma50)-1]
-	}
+	lastSMA50 := sma50[len(sma50)-1]
 
 	var trend string
 	if currentPrice > lastSMA20 && lastSMA20 > lastSMA50 {
@@ -314,7 +311,7 @@ func calculateEMA(symbol string, bars []api.Bar) {
 }
 
 func getEMAData(symbol string, bars []api.Bar) *api.EMAOutput {
-	if len(bars) < 12 {
+	if len(bars) < 26 {
 		return nil
 	}
 
