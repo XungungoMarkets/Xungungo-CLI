@@ -57,25 +57,25 @@ var technicalCmd = &cobra.Command{
 
 				if ind == "all" {
 					// If "all" is specified, get all indicators
-					results = append(results, getRSIData(args[0], bars))
-					results = append(results, getMACDData(args[0], bars))
-					results = append(results, getSMAData(args[0], bars))
-					results = append(results, getEMAData(args[0], bars))
-					results = append(results, getBollingerBandsData(args[0], bars))
+					results = append(results, GetRSIData(args[0], bars))
+					results = append(results, GetMACDData(args[0], bars))
+					results = append(results, GetSMAData(args[0], bars))
+					results = append(results, GetEMAData(args[0], bars))
+					results = append(results, GetBollingerBandsData(args[0], bars))
 					break
 				}
 
 				switch ind {
 				case "rsi":
-					results = append(results, getRSIData(args[0], bars))
+					results = append(results, GetRSIData(args[0], bars))
 				case "macd":
-					results = append(results, getMACDData(args[0], bars))
+					results = append(results, GetMACDData(args[0], bars))
 				case "sma":
-					results = append(results, getSMAData(args[0], bars))
+					results = append(results, GetSMAData(args[0], bars))
 				case "ema":
-					results = append(results, getEMAData(args[0], bars))
+					results = append(results, GetEMAData(args[0], bars))
 				case "bb":
-					results = append(results, getBollingerBandsData(args[0], bars))
+					results = append(results, GetBollingerBandsData(args[0], bars))
 				default:
 					return fmt.Errorf("unknown indicator: %s. Use: rsi, macd, sma, ema, bb, or all", ind)
 				}
@@ -122,7 +122,7 @@ var technicalCmd = &cobra.Command{
 
 // RSI functions
 func calculateRSI(symbol string, bars []api.Bar) {
-	data := getRSIData(symbol, bars)
+	data := GetRSIData(symbol, bars)
 	if data == nil {
 		yellow := color.New(color.FgYellow)
 		yellow.Printf("⚠️  Not enough data for RSI (requires 14 bars, have %d)\n", len(bars))
@@ -131,7 +131,8 @@ func calculateRSI(symbol string, bars []api.Bar) {
 	printRSIHumanReadable(data)
 }
 
-func getRSIData(symbol string, bars []api.Bar) *api.RSIOutput {
+// GetRSIData calculates RSI indicator data for technical analysis
+func GetRSIData(symbol string, bars []api.Bar) *api.RSIOutput {
 	if len(bars) < 14 {
 		return nil
 	}
@@ -179,7 +180,7 @@ func printRSIHumanReadable(data *api.RSIOutput) {
 
 // MACD functions
 func calculateMACD(symbol string, bars []api.Bar) {
-	data := getMACDData(symbol, bars)
+	data := GetMACDData(symbol, bars)
 	if data == nil {
 		yellow := color.New(color.FgYellow)
 		yellow.Printf("⚠️  Not enough data for MACD (requires 26 bars, have %d)\n", len(bars))
@@ -188,7 +189,8 @@ func calculateMACD(symbol string, bars []api.Bar) {
 	printMACDHumanReadable(data)
 }
 
-func getMACDData(symbol string, bars []api.Bar) *api.MACDOutput {
+// GetMACDData calculates MACD indicator data for technical analysis
+func GetMACDData(symbol string, bars []api.Bar) *api.MACDOutput {
 	if len(bars) < 26 {
 		return nil
 	}
@@ -243,7 +245,7 @@ func printMACDHumanReadable(data *api.MACDOutput) {
 
 // SMA functions
 func calculateSMA(symbol string, bars []api.Bar) {
-	data := getSMAData(symbol, bars)
+	data := GetSMAData(symbol, bars)
 	if data == nil {
 		yellow := color.New(color.FgYellow)
 		yellow.Printf("⚠️  Not enough data for SMA (requires 50 bars, have %d)\n", len(bars))
@@ -252,7 +254,8 @@ func calculateSMA(symbol string, bars []api.Bar) {
 	printSMAHumanReadable(data)
 }
 
-func getSMAData(symbol string, bars []api.Bar) *api.SMAOutput {
+// GetSMAData calculates SMA indicator data for technical analysis
+func GetSMAData(symbol string, bars []api.Bar) *api.SMAOutput {
 	if len(bars) < 50 {
 		return nil
 	}
@@ -310,7 +313,7 @@ func printSMAHumanReadable(data *api.SMAOutput) {
 
 // EMA functions
 func calculateEMA(symbol string, bars []api.Bar) {
-	data := getEMAData(symbol, bars)
+	data := GetEMAData(symbol, bars)
 	if data == nil {
 		yellow := color.New(color.FgYellow)
 		yellow.Printf("⚠️  Not enough data for EMA (requires 26 bars, have %d)\n", len(bars))
@@ -319,7 +322,8 @@ func calculateEMA(symbol string, bars []api.Bar) {
 	printEMAHumanReadable(data)
 }
 
-func getEMAData(symbol string, bars []api.Bar) *api.EMAOutput {
+// GetEMAData calculates EMA indicator data for technical analysis
+func GetEMAData(symbol string, bars []api.Bar) *api.EMAOutput {
 	if len(bars) < 26 {
 		return nil
 	}
@@ -375,7 +379,7 @@ func printEMAHumanReadable(data *api.EMAOutput) {
 
 // Bollinger Bands functions
 func calculateBollingerBands(symbol string, bars []api.Bar) {
-	data := getBollingerBandsData(symbol, bars)
+	data := GetBollingerBandsData(symbol, bars)
 	if data == nil {
 		yellow := color.New(color.FgYellow)
 		yellow.Printf("⚠️  Not enough data for Bollinger Bands (requires 20 bars, have %d)\n", len(bars))
@@ -384,7 +388,8 @@ func calculateBollingerBands(symbol string, bars []api.Bar) {
 	printBollingerBandsHumanReadable(data)
 }
 
-func getBollingerBandsData(symbol string, bars []api.Bar) *api.BollingerBandsOutput {
+// GetBollingerBandsData calculates Bollinger Bands indicator data for technical analysis
+func GetBollingerBandsData(symbol string, bars []api.Bar) *api.BollingerBandsOutput {
 	if len(bars) < 20 {
 		return nil
 	}

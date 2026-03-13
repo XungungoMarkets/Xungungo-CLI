@@ -1,9 +1,10 @@
-package cmd
+package test
 
 import (
 	"testing"
 	"time"
 
+	"github.com/XungungoMarkets/xgg/cmd"
 	"github.com/XungungoMarkets/xgg/internal/api"
 	"github.com/markcheno/go-talib"
 )
@@ -34,19 +35,19 @@ func TestGetRSIData(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			data := getRSIData(tt.symbol, tt.bars)
+			data := cmd.GetRSIData(tt.symbol, tt.bars)
 			if tt.wantNil && data != nil {
-				t.Errorf("getRSIData() should return nil, got %+v", data)
+				t.Errorf("GetRSIData() should return nil, got %+v", data)
 			}
 			if !tt.wantNil && data == nil {
-				t.Errorf("getRSIData() should not return nil")
+				t.Errorf("GetRSIData() should not return nil")
 			}
 			if data != nil {
 				if data.Symbol != tt.symbol {
-					t.Errorf("getRSIData() symbol = %v, want %v", data.Symbol, tt.symbol)
+					t.Errorf("GetRSIData() symbol = %v, want %v", data.Symbol, tt.symbol)
 				}
 				if data.Indicator != "RSI(14)" {
-					t.Errorf("getRSIData() indicator = %v, want %v", data.Indicator, "RSI(14)")
+					t.Errorf("GetRSIData() indicator = %v, want %v", data.Indicator, "RSI(14)")
 				}
 			}
 		})
@@ -76,19 +77,19 @@ func TestGetMACDData(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			data := getMACDData(tt.symbol, tt.bars)
+			data := cmd.GetMACDData(tt.symbol, tt.bars)
 			if tt.wantNil && data != nil {
-				t.Errorf("getMACDData() should return nil, got %+v", data)
+				t.Errorf("GetMACDData() should return nil, got %+v", data)
 			}
 			if !tt.wantNil && data == nil {
-				t.Errorf("getMACDData() should not return nil")
+				t.Errorf("GetMACDData() should not return nil")
 			}
 			if data != nil {
 				if data.Symbol != tt.symbol {
-					t.Errorf("getMACDData() symbol = %v, want %v", data.Symbol, tt.symbol)
+					t.Errorf("GetMACDData() symbol = %v, want %v", data.Symbol, tt.symbol)
 				}
 				if data.Indicator != "MACD(12,26,9)" {
-					t.Errorf("getMACDData() indicator = %v, want %v", data.Indicator, "MACD(12,26,9)")
+					t.Errorf("GetMACDData() indicator = %v, want %v", data.Indicator, "MACD(12,26,9)")
 				}
 			}
 		})
@@ -118,19 +119,19 @@ func TestGetSMAData(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			data := getSMAData(tt.symbol, tt.bars)
+			data := cmd.GetSMAData(tt.symbol, tt.bars)
 			if tt.wantNil && data != nil {
-				t.Errorf("getSMAData() should return nil, got %+v", data)
+				t.Errorf("GetSMAData() should return nil, got %+v", data)
 			}
 			if !tt.wantNil && data == nil {
-				t.Errorf("getSMAData() should not return nil")
+				t.Errorf("GetSMAData() should not return nil")
 			}
 			if data != nil {
 				if data.Symbol != tt.symbol {
-					t.Errorf("getSMAData() symbol = %v, want %v", data.Symbol, tt.symbol)
+					t.Errorf("GetSMAData() symbol = %v, want %v", data.Symbol, tt.symbol)
 				}
 				if data.Indicator != "SMA(20,50)" {
-					t.Errorf("getSMAData() indicator = %v, want %v", data.Indicator, "SMA(20,50)")
+					t.Errorf("GetSMAData() indicator = %v, want %v", data.Indicator, "SMA(20,50)")
 				}
 			}
 		})
@@ -160,19 +161,19 @@ func TestGetEMAData(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			data := getEMAData(tt.symbol, tt.bars)
+			data := cmd.GetEMAData(tt.symbol, tt.bars)
 			if tt.wantNil && data != nil {
-				t.Errorf("getEMAData() should return nil, got %+v", data)
+				t.Errorf("GetEMAData() should return nil, got %+v", data)
 			}
 			if !tt.wantNil && data == nil {
-				t.Errorf("getEMAData() should not return nil")
+				t.Errorf("GetEMAData() should not return nil")
 			}
 			if data != nil {
 				if data.Symbol != tt.symbol {
-					t.Errorf("getEMAData() symbol = %v, want %v", data.Symbol, tt.symbol)
+					t.Errorf("GetEMAData() symbol = %v, want %v", data.Symbol, tt.symbol)
 				}
 				if data.Indicator != "EMA(12,26)" {
-					t.Errorf("getEMAData() indicator = %v, want %v", data.Indicator, "EMA(12,26)")
+					t.Errorf("GetEMAData() indicator = %v, want %v", data.Indicator, "EMA(12,26)")
 				}
 			}
 		})
@@ -202,19 +203,19 @@ func TestGetBollingerBandsData(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			data := getBollingerBandsData(tt.symbol, tt.bars)
+			data := cmd.GetBollingerBandsData(tt.symbol, tt.bars)
 			if tt.wantNil && data != nil {
-				t.Errorf("getBollingerBandsData() should return nil, got %+v", data)
+				t.Errorf("GetBollingerBandsData() should return nil, got %+v", data)
 			}
 			if !tt.wantNil && data == nil {
-				t.Errorf("getBollingerBandsData() should not return nil")
+				t.Errorf("GetBollingerBandsData() should not return nil")
 			}
 			if data != nil {
 				if data.Symbol != tt.symbol {
-					t.Errorf("getBollingerBandsData() symbol = %v, want %v", data.Symbol, tt.symbol)
+					t.Errorf("GetBollingerBandsData() symbol = %v, want %v", data.Symbol, tt.symbol)
 				}
 				if data.Indicator != "Bollinger Bands(20,2)" {
-					t.Errorf("getBollingerBandsData() indicator = %v, want %v", data.Indicator, "Bollinger Bands(20,2)")
+					t.Errorf("GetBollingerBandsData() indicator = %v, want %v", data.Indicator, "Bollinger Bands(20,2)")
 				}
 			}
 		})
@@ -223,7 +224,7 @@ func TestGetBollingerBandsData(t *testing.T) {
 
 func TestRSISignal(t *testing.T) {
 	bars := generateBars(20)
-	data := getRSIData("TEST", bars)
+	data := cmd.GetRSIData("TEST", bars)
 	if data != nil {
 		// Verify signal is one of the expected values
 		if data.Signal != "overbought" && data.Signal != "oversold" && data.Signal != "neutral" {
@@ -238,7 +239,7 @@ func TestRSISignal(t *testing.T) {
 
 func TestEMATrend(t *testing.T) {
 	bars := generateBars(30)
-	data := getEMAData("TEST", bars)
+	data := cmd.GetEMAData("TEST", bars)
 	if data != nil {
 		// Verify trend is one of the expected values
 		if data.Trend != "bullish" && data.Trend != "bearish" && data.Trend != "neutral" {
