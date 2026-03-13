@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/XungungoMarkets/xgg/internal/api"
+	"github.com/fatih/color"
 	"github.com/markcheno/go-talib"
 	"github.com/spf13/cobra"
 )
@@ -123,6 +124,8 @@ var technicalCmd = &cobra.Command{
 func calculateRSI(symbol string, bars []api.Bar) {
 	data := getRSIData(symbol, bars)
 	if data == nil {
+		yellow := color.New(color.FgYellow)
+		yellow.Printf("⚠️  Not enough data for RSI (requires 14 bars, have %d)\n", len(bars))
 		return
 	}
 	printRSIHumanReadable(data)
@@ -178,6 +181,8 @@ func printRSIHumanReadable(data *api.RSIOutput) {
 func calculateMACD(symbol string, bars []api.Bar) {
 	data := getMACDData(symbol, bars)
 	if data == nil {
+		yellow := color.New(color.FgYellow)
+		yellow.Printf("⚠️  Not enough data for MACD (requires 26 bars, have %d)\n", len(bars))
 		return
 	}
 	printMACDHumanReadable(data)
@@ -240,6 +245,8 @@ func printMACDHumanReadable(data *api.MACDOutput) {
 func calculateSMA(symbol string, bars []api.Bar) {
 	data := getSMAData(symbol, bars)
 	if data == nil {
+		yellow := color.New(color.FgYellow)
+		yellow.Printf("⚠️  Not enough data for SMA (requires 50 bars, have %d)\n", len(bars))
 		return
 	}
 	printSMAHumanReadable(data)
@@ -305,6 +312,8 @@ func printSMAHumanReadable(data *api.SMAOutput) {
 func calculateEMA(symbol string, bars []api.Bar) {
 	data := getEMAData(symbol, bars)
 	if data == nil {
+		yellow := color.New(color.FgYellow)
+		yellow.Printf("⚠️  Not enough data for EMA (requires 26 bars, have %d)\n", len(bars))
 		return
 	}
 	printEMAHumanReadable(data)
@@ -368,6 +377,8 @@ func printEMAHumanReadable(data *api.EMAOutput) {
 func calculateBollingerBands(symbol string, bars []api.Bar) {
 	data := getBollingerBandsData(symbol, bars)
 	if data == nil {
+		yellow := color.New(color.FgYellow)
+		yellow.Printf("⚠️  Not enough data for Bollinger Bands (requires 20 bars, have %d)\n", len(bars))
 		return
 	}
 	printBollingerBandsHumanReadable(data)
