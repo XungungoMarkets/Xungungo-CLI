@@ -12,7 +12,7 @@ import (
 )
 
 // Version is set at build time using -ldflags
-var Version = "0.2.0"
+var Version = "dev"
 
 // JSONOutput is a global flag to control JSON output format
 var JSONOutput bool

@@ -49,7 +49,7 @@ jobs:
           CGO_ENABLED: 0
         run: |
           OUTPUT_NAME="xgg-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.suffix }}"
-          go build -ldflags="-s -w -X main.Version=${{ steps.version.outputs.VERSION }}" -o "$OUTPUT_NAME"
+          go build -ldflags="-s -w -X github.com/XungungoMarkets/xgg/cmd.Version=${{ steps.version.outputs.VERSION }}" -o "$OUTPUT_NAME"
           
           # Create archive for Linux/macOS
           if [[ "${{ matrix.goos }}" == "linux" || "${{ matrix.goos }}" == "darwin" ]]; then
