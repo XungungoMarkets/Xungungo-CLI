@@ -34,12 +34,12 @@
 
 ### From GitHub Releases (Recommended) ⭐
 
-Download pre-compiled binary for your operating system from [v0.2.3 Release](https://github.com/XungungoMarkets/Xungungo-CLI/releases/tag/v0.2.3) page.
+Download pre-compiled binary for your operating system from [v0.2.4 Release](https://github.com/XungungoMarkets/Xungungo-CLI/releases/tag/v0.2.4) page.
 
 **Linux/macOS:**
 ```bash
 # Download file
-wget https://github.com/XungungoMarkets/Xungungo-CLI/releases/download/v0.2.3/xgg-linux-amd64.tar.gz
+wget https://github.com/XungungoMarkets/Xungungo-CLI/releases/download/v0.2.4/xgg-linux-amd64.tar.gz
 
 # Extract
 tar xzf xgg-linux-amd64.tar.gz
@@ -51,7 +51,7 @@ sudo mv xgg /usr/local/bin/
 **macOS (Apple Silicon):**
 ```bash
 # Download
-wget https://github.com/XungungoMarkets/Xungungo-CLI/releases/download/v0.2.3/xgg-darwin-arm64.tar.gz
+wget https://github.com/XungungoMarkets/Xungungo-CLI/releases/download/v0.2.4/xgg-darwin-arm64.tar.gz
 
 # Extract
 tar xzf xgg-darwin-arm64.tar.gz
@@ -63,7 +63,7 @@ sudo mv xgg /usr/local/bin/
 **Windows:**
 ```powershell
 # Download file
-# https://github.com/XungungoMarkets/Xungungo-CLI/releases/download/v0.2.3/xgg-windows-amd64.zip
+# https://github.com/XungungoMarkets/Xungungo-CLI/releases/download/v0.2.4/xgg-windows-amd64.zip
 
 # Extract and move to a folder in your PATH
 ```
@@ -392,7 +392,7 @@ xgg version
 **Output:**
 ```
 📈 Xungungo CLI
-Version: 0.2.3
+Version: 0.2.4
 GitHub: https://github.com/XungungoMarkets/Xungungo-CLI
 ```
 
@@ -404,15 +404,15 @@ xgg check-update
 
 **Output:**
 ```
-✓ You are using the latest version: 0.2.3
+✓ You are using the latest version: 0.2.4
 ```
 
 Or if an update is available:
 ```
 ⚠ A new version is available!
-  Current: 0.2.3
-  Latest: 0.2.4
-  Release:  https://github.com/XungungoMarkets/Xungungo-CLI/releases/download/v0.2.4/xgg-linux-amd64.tar.gz
+  Current: 0.2.4
+  Latest: 0.2.5
+  Release:  https://github.com/XungungoMarkets/Xungungo-CLI/releases/download/v0.2.5/xgg-linux-amd64.tar.gz
 
 Run 'xgg update' to update to the latest version.
 ```
