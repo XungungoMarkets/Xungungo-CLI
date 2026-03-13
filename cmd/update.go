@@ -117,7 +117,13 @@ func doUpdate() {
 
 	cyan.Println("\n⏳ Downloading update...")
 
-	if err := selfupdate.UpdateTo(latest.AssetURL, os.Args[0]); err != nil {
+	execPath, err := os.Executable()
+	if err != nil {
+		log.Println("Error getting executable path:", err)
+		os.Exit(1)
+	}
+
+	if err := selfupdate.UpdateTo(latest.AssetURL, execPath); err != nil {
 		log.Println("Error updating:", err)
 		os.Exit(1)
 	}
