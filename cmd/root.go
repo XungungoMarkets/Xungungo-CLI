@@ -49,6 +49,11 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&watchlistType, "watchlist-type", "", "NASDAQ watchlist type parameter (e.g. Rv)")
 }
 
+// GetRootCommand returns the root cobra command for testing purposes
+func GetRootCommand() *cobra.Command {
+	return rootCmd
+}
+
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
