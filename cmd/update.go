@@ -147,10 +147,12 @@ func confirm(prompt string) bool {
 	}
 }
 
-// semverParse is a wrapper around semver.Make that handles "dev" version
+// semverParse is a wrapper around semver.Make that handles "dev" version and "v" prefix
 func semverParse(version string) (semver.Version, error) {
 	if version == "dev" {
 		return semver.Version{Major: 0, Minor: 0, Patch: 0}, nil
 	}
-	return semver.Make(version)
+	// Remove "v" prefix if present (e.g., "v0.2.2" -> "0.2.2")
+	cleanVersion := strings.TrimPrefix(version, "v")
+	return semver.Make(cleanVersion)
 }
