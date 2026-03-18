@@ -24,6 +24,11 @@ type SearchProvider interface {
 	Search(ctx context.Context, query string, limit int, includeMarketData bool) ([]market.SearchResult, error)
 }
 
+// SectorProvider is the interface for providers that support sector data.
+type SectorProvider interface {
+	GetSectors(ctx context.Context) ([]market.SectorSummary, error)
+}
+
 // Service orchestrates market data fetching across providers with fallback support.
 type Service struct {
 	mode     config.ProviderMode
@@ -158,4 +163,15 @@ func GetQuote(symbol string) (*market.StockQuote, error) {
 func GetHistory(symbol, period string) ([]market.Bar, error) {
 	bars, _, err := ServiceHandle().GetHistory(context.Background(), symbol, period)
 	return bars, err
+}
+
+func (s *Service) GetSectors(ctx context.Context) ([]market.SectorSummary, error) {
+	if s.mode == config.ProviderLegacy {
+		return nil, fmt.Errorf("sectors command requires nasdaq provider")
+	}
+	sp, ok := s.primary.(SectorProvider)
+	if !ok {
+		return nil, fmt.Errorf("provider %s does not support sector data", s.primary.Name())
+	}
+	return sp.GetSectors(ctx)
 }

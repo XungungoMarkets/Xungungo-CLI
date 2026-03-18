@@ -146,6 +146,50 @@ func (p *Provider) GetHistory(ctx context.Context, symbol string, period string)
 	return bars, nil
 }
 
+func (p *Provider) GetSectors(ctx context.Context) ([]market.SectorSummary, error) {
+	resp, err := p.client.GetScreenerStocks(ctx, true)
+	if err != nil {
+		return nil, err
+	}
+
+	type accum struct {
+		sum   float64
+		count int
+	}
+	sectors := make(map[string]*accum)
+
+	for _, row := range resp.Rows {
+		sector := strings.TrimSpace(row.Sector)
+		if sector == "" {
+			continue
+		}
+		pct, err := parse.ParseFloat(row.PercentageChange)
+		if err != nil {
+			continue
+		}
+		if _, ok := sectors[sector]; !ok {
+			sectors[sector] = &accum{}
+		}
+		sectors[sector].sum += pct
+		sectors[sector].count++
+	}
+
+	result := make([]market.SectorSummary, 0, len(sectors))
+	for name, a := range sectors {
+		result = append(result, market.SectorSummary{
+			Sector:    name,
+			AvgChange: a.sum / float64(a.count),
+			Count:     a.count,
+		})
+	}
+
+	sort.Slice(result, func(i, j int) bool {
+		return result[i].AvgChange > result[j].AvgChange
+	})
+
+	return result, nil
+}
+
 func (p *Provider) Search(ctx context.Context, query string, limit int, includeMarketData bool) ([]market.SearchResult, error) {
 	resp, err := p.client.Search(ctx, strings.TrimSpace(query), limit, includeMarketData)
 	if err == nil && resp != nil {

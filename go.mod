@@ -4,7 +4,7 @@ go 1.26.1
 
 require (
 	github.com/XungungoMarkets/xgg-finance-go v0.0.0-20260311174637-65bc3ed89cee
-	github.com/XungungoMarkets/xgg-nasdaq-go v0.0.0-20260312150930-c9b79a05ee32
+	github.com/XungungoMarkets/xgg-nasdaq-go v0.0.0-20260318013729-1551a3d5b3b5
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/fatih/color v1.18.0
 	github.com/markcheno/go-talib v0.0.0-20250114000313-ec55a20c902f
