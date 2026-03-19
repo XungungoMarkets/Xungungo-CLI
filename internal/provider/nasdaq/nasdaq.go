@@ -190,6 +190,57 @@ func (p *Provider) GetSectors(ctx context.Context) ([]market.SectorSummary, erro
 	return result, nil
 }
 
+func (p *Provider) GetIndustries(ctx context.Context) ([]market.IndustrySummary, error) {
+	resp, err := p.client.GetScreenerStocks(ctx, true)
+	if err != nil {
+		return nil, err
+	}
+
+	type accum struct {
+		sum   float64
+		count int
+	}
+	type key struct{ sector, industry string }
+	groups := make(map[key]*accum)
+
+	for _, row := range resp.Rows {
+		sector := strings.TrimSpace(row.Sector)
+		industry := strings.TrimSpace(row.Industry)
+		if sector == "" || industry == "" {
+			continue
+		}
+		pct, err := parse.ParseFloat(row.PercentageChange)
+		if err != nil {
+			continue
+		}
+		k := key{sector, industry}
+		if _, ok := groups[k]; !ok {
+			groups[k] = &accum{}
+		}
+		groups[k].sum += pct
+		groups[k].count++
+	}
+
+	result := make([]market.IndustrySummary, 0, len(groups))
+	for k, a := range groups {
+		result = append(result, market.IndustrySummary{
+			Sector:    k.sector,
+			Industry:  k.industry,
+			AvgChange: a.sum / float64(a.count),
+			Count:     a.count,
+		})
+	}
+
+	sort.Slice(result, func(i, j int) bool {
+		if result[i].Sector != result[j].Sector {
+			return result[i].Sector < result[j].Sector
+		}
+		return result[i].AvgChange > result[j].AvgChange
+	})
+
+	return result, nil
+}
+
 func (p *Provider) Search(ctx context.Context, query string, limit int, includeMarketData bool) ([]market.SearchResult, error) {
 	resp, err := p.client.Search(ctx, strings.TrimSpace(query), limit, includeMarketData)
 	if err == nil && resp != nil {

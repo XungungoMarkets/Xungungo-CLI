@@ -31,7 +31,9 @@
       "Bash(GOFLAGS=-mod=mod go get github.com/XungungoMarkets/xgg-nasdaq-go@main)",
       "Bash(GOFLAGS=-mod=mod GONOSUMDB=* GONOPROXY=* go get github.com/XungungoMarkets/xgg-nasdaq-go@main)",
       "Read(//d/Desarrollo/xgg-nasdaq-go/nasdaq/**)",
-      "Read(//d/Desarrollo/xgg-nasdaq-go/**)"
+      "Read(//d/Desarrollo/xgg-nasdaq-go/**)",
+      "Bash(git tag:*)",
+      "Bash(git push:*)"
     ],
     "additionalDirectories": [
       "D:\\Desarrollo\\xgg-nasdaq-go\\nasdaq"
