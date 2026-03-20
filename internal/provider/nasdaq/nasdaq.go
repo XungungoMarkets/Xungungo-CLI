@@ -344,12 +344,15 @@ func (p *Provider) GetCountryStocks(ctx context.Context) ([]market.CountryWithSt
 
 func (p *Provider) Search(ctx context.Context, query string, limit int, includeMarketData bool) ([]market.SearchResult, error) {
 	resp, err := p.client.Search(ctx, strings.TrimSpace(query), limit, includeMarketData)
-	if err == nil && resp != nil {
+	if err == nil && resp != nil && len(resp.Data) > 0 {
 		results := make([]market.SearchResult, 0, len(resp.Data))
 		for _, row := range resp.Data {
 			results = append(results, mapSearchSuggestion(row))
 		}
-		return results, nil
+		// Only return if we got actual symbols — shape may have changed
+		if len(results) > 0 && results[0].Symbol != "" {
+			return results, nil
+		}
 	}
 
 	// Fallback parsing path for current autosuggest shape (status.rCode + data[].metadata)
