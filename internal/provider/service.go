@@ -128,11 +128,43 @@ func (s *Service) Search(ctx context.Context, query string, limit int, includeMa
 		return nil, config.CallMeta{ProviderUsed: s.primary.Name()}, fmt.Errorf("provider %s does not support search", s.primary.Name())
 	}
 
-	results, err := sp.Search(ctx, query, limit, includeMarketData)
-	if err != nil {
-		return nil, config.CallMeta{ProviderUsed: s.primary.Name(), PrimaryErr: err}, err
+	type searchOutcome struct {
+		results []market.SearchResult
+		err     error
 	}
-	return results, config.CallMeta{ProviderUsed: s.primary.Name()}, nil
+
+	nasdaqCh := make(chan searchOutcome, 1)
+	yahooCh := make(chan searchOutcome, 1)
+
+	go func() {
+		res, err := sp.Search(ctx, query, limit, includeMarketData)
+		for i := range res {
+			res[i].Source = "NASDAQ"
+		}
+		nasdaqCh <- searchOutcome{res, err}
+	}()
+
+	go func() {
+		if ysp, ok := s.fallback.(SearchProvider); ok {
+			res, err := ysp.Search(ctx, query, limit, includeMarketData)
+			for i := range res {
+				res[i].Source = "Yahoo"
+			}
+			yahooCh <- searchOutcome{res, err}
+		} else {
+			yahooCh <- searchOutcome{}
+		}
+	}()
+
+	nasdaq := <-nasdaqCh
+	yahoo := <-yahooCh
+
+	if nasdaq.err != nil {
+		return nil, config.CallMeta{ProviderUsed: s.primary.Name(), PrimaryErr: nasdaq.err}, nasdaq.err
+	}
+
+	combined := append(nasdaq.results, yahoo.results...)
+	return combined, config.CallMeta{ProviderUsed: s.primary.Name()}, nil
 }
 
 // --- Singleton runtime state ---

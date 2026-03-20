@@ -6,4 +6,5 @@ type SearchResult struct {
 	Name        string `json:"name"`
 	Type        string `json:"type"`
 	Description string `json:"description"`
+	Source      string `json:"source"`
 }
