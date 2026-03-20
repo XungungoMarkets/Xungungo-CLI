@@ -134,6 +134,95 @@ func PrintIndustries(industries []market.IndustrySummary) {
 	printBorder("└", "─", "┘")
 }
 
+func PrintCountryStocks(countries []market.CountryWithStocks) {
+	green := color.New(color.FgGreen).SprintFunc()
+	red := color.New(color.FgRed).SprintFunc()
+	bold := color.New(color.Bold).SprintFunc()
+	dim := color.New(color.Faint).SprintFunc()
+	cyan := color.New(color.FgCyan, color.Bold).SprintFunc()
+
+	border := strings.Repeat("─", indLineWidth)
+	printRow := func(line string) {
+		fmt.Printf("%s%s%s\n", dim("│"), line, dim("│"))
+	}
+	printBorder := func(l, m, r string) {
+		fmt.Printf("%s%s%s\n", dim(l), dim(border), dim(r))
+	}
+
+	// Header
+	headerName := fmt.Sprintf("%-*s", indNameCol, "Country / Stock")
+	header := fmt.Sprintf("  %s %s  %*s  %*s  ",
+		" ", bold(headerName), indPctCol, bold("Chg%"), indCntCol, bold("Stocks"))
+	printBorder("┌", "─", "┐")
+	printRow(header)
+
+	const symWidth = 6
+	const indIndent = 2
+	const stockNameCol = indNameCol - indIndent - symWidth - 1 // 1 for space between symbol and name
+
+	for _, c := range countries {
+		printBorder("├", "─", "┤")
+
+		// Country header row
+		arrow := green("▲")
+		pctField := fmtPctField(c.AvgChange)
+		coloredPct := green(pctField)
+		if c.AvgChange < 0 {
+			arrow = red("▼")
+			coloredPct = red(pctField)
+		}
+		countryNameField := fmt.Sprintf("%-*s", indNameCol, truncate(c.Country, indNameCol))
+		printRow(fmt.Sprintf("  %s %s  %s  %*d  ",
+			arrow, cyan(bold(countryNameField)), coloredPct, indCntCol, c.Count))
+
+		// Stock rows
+		for _, s := range c.Stocks {
+			sArrow := green("▲")
+			sPct := fmtPctField(s.ChangePct)
+			sColoredPct := green(sPct)
+			if s.ChangePct < 0 {
+				sArrow = red("▼")
+				sColoredPct = red(sPct)
+			}
+			sym := fmt.Sprintf("%-*s", symWidth, truncate(s.Symbol, symWidth))
+			name := fmt.Sprintf("%-*s", stockNameCol, truncate(s.Name, stockNameCol))
+			nameField := fmt.Sprintf("%*s%s %s", indIndent, "", sym, name)
+			printRow(fmt.Sprintf("  %s %s  %s  %*s  ",
+				sArrow, nameField, sColoredPct, indCntCol, ""))
+		}
+	}
+
+	printBorder("└", "─", "┘")
+}
+
+func PrintCountries(countries []market.CountrySummary) {
+	green := color.New(color.FgGreen).SprintFunc()
+	red := color.New(color.FgRed).SprintFunc()
+	bold := color.New(color.Bold).SprintFunc()
+	dim := color.New(color.Faint).SprintFunc()
+
+	header := fmt.Sprintf("  %-35s  %8s  %6s", "Country", "Avg Chg%", "Stocks")
+	width := len(header) + 2
+	border := dim(strings.Repeat("─", width))
+
+	fmt.Printf("%s%s%s\n", dim("┌"), border, dim("┐"))
+	fmt.Printf("%s  %-*s  %s\n", dim("│"), width-2, bold(header), dim("│"))
+	fmt.Printf("%s%s%s\n", dim("├"), border, dim("┤"))
+
+	for _, c := range countries {
+		arrow := green("▲")
+		pctStr := green(fmt.Sprintf("+%.2f%%", c.AvgChange))
+		if c.AvgChange < 0 {
+			arrow = red("▼")
+			pctStr = red(fmt.Sprintf("%.2f%%", c.AvgChange))
+		}
+		row := fmt.Sprintf("  %s %-33s  %8s  %6d", arrow, c.Country, pctStr, c.Count)
+		fmt.Printf("%s  %-*s  %s\n", dim("│"), width-2, row, dim("│"))
+	}
+
+	fmt.Printf("%s%s%s\n", dim("└"), border, dim("┘"))
+}
+
 func PrintSectors(sectors []market.SectorSummary) {
 	green := color.New(color.FgGreen).SprintFunc()
 	red := color.New(color.FgRed).SprintFunc()

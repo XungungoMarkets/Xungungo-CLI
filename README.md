@@ -18,6 +18,8 @@
   - [Historical Data](#historical-data)
   - [Chart Generation](#chart-generation)
   - [Technical Analysis](#technical-analysis)
+  - [Market Sectors](#market-sectors)
+  - [Country Analysis](#country-analysis)
   - [Version & Updates](#version--updates)
 - [Requirements](#requirements)
 - [License](#license)
@@ -30,6 +32,8 @@
 - 📈 **Historical data**: Access OHLCV data (Open, High, Low, Close, Volume)
 - 📉 **Technical analysis**: RSI, MACD, SMA, EMA, Bollinger Bands
 - 🖼️ **Chart generation**: Render line and candlestick charts as PNG images
+- 🏭 **Market sectors**: Average daily % change grouped by sector or industry
+- 🌍 **Country analysis**: Average daily % change grouped by country, with per-stock breakdown
 - 🎨 **Visual interface**: Colors and elegant formatting in terminal
 - ⚡ **Fast**: Multiple symbols in a single request
 - 📅 **Configurable periods**: 5 days, 1 month, 3 months, 6 months, 1 year, 5 years
@@ -41,12 +45,12 @@
 
 ### From GitHub Releases (Recommended) ⭐
 
-Download pre-compiled binary for your operating system from [v0.2.6 Release](https://github.com/XungungoMarkets/Xungungo-CLI/releases/tag/v0.2.6) page.
+Download pre-compiled binary for your operating system from [v0.2.8 Release](https://github.com/XungungoMarkets/Xungungo-CLI/releases/tag/v0.2.8) page.
 
 **Linux/macOS:**
 ```bash
 # Download file
-wget https://github.com/XungungoMarkets/Xungungo-CLI/releases/download/v0.2.6/xgg-linux-amd64.tar.gz
+wget https://github.com/XungungoMarkets/Xungungo-CLI/releases/download/v0.2.8/xgg-linux-amd64.tar.gz
 
 # Extract
 tar xzf xgg-linux-amd64.tar.gz
@@ -58,7 +62,7 @@ sudo mv xgg /usr/local/bin/
 **macOS (Apple Silicon):**
 ```bash
 # Download
-wget https://github.com/XungungoMarkets/Xungungo-CLI/releases/download/v0.2.6/xgg-darwin-arm64.tar.gz
+wget https://github.com/XungungoMarkets/Xungungo-CLI/releases/download/v0.2.8/xgg-darwin-arm64.tar.gz
 
 # Extract
 tar xzf xgg-darwin-arm64.tar.gz
@@ -70,7 +74,7 @@ sudo mv xgg /usr/local/bin/
 **Windows:**
 ```powershell
 # Download file
-# https://github.com/XungungoMarkets/Xungungo-CLI/releases/download/v0.2.6/xgg-windows-amd64.zip
+# https://github.com/XungungoMarkets/Xungungo-CLI/releases/download/v0.2.8/xgg-windows-amd64.zip
 
 # Extract and move to a folder in your PATH
 ```
@@ -426,6 +430,62 @@ To get information without decorative borders, you can redirect the output or us
 xgg stock NVDA | grep -E "NVDA|Price"
 ```
 
+### Market Sectors
+
+Show the average daily % change for all NASDAQ-listed stocks grouped by sector:
+
+```bash
+xgg sectors
+```
+
+Group by sector and industry:
+
+```bash
+xgg sectors --by-industry
+```
+
+```bash
+xgg sectors --json
+```
+
+### Country Analysis
+
+Show the average daily % change grouped by country of incorporation:
+
+```bash
+xgg country
+```
+
+Filter by country name:
+
+```bash
+xgg country uruguay
+xgg country "hong kong"
+xgg country hong kong
+```
+
+Show individual stocks grouped by country:
+
+```bash
+xgg country --by-stock
+```
+
+Filter stocks by country (single or multi-word names):
+
+```bash
+xgg country --by-stock uruguay
+xgg country --by-stock hong kong
+xgg country --by-stock united states
+```
+
+JSON output:
+
+```bash
+xgg country --json
+xgg country --by-stock --json
+xgg country --by-stock hong kong --json
+```
+
 ### Version & Updates
 
 Check the current version:
@@ -437,7 +497,7 @@ xgg version
 **Output:**
 ```
 📈 Xungungo CLI
-Version: 0.2.6
+Version: 0.2.8
 GitHub: https://github.com/XungungoMarkets/Xungungo-CLI
 ```
 
@@ -449,13 +509,13 @@ xgg check-update
 
 **Output:**
 ```
-✓ You are using the latest version: 0.2.6
+✓ You are using the latest version: 0.2.8
 ```
 
 Or if an update is available:
 ```
 ⚠ A new version is available!
-  Current: 0.2.6
+  Current: 0.2.8
   Latest: 0.2.7
   Release:  https://github.com/XungungoMarkets/Xungungo-CLI/releases/download/v0.2.7/xgg-linux-amd64.tar.gz
 

@@ -30,6 +30,12 @@ type SectorProvider interface {
 	GetIndustries(ctx context.Context) ([]market.IndustrySummary, error)
 }
 
+// CountryProvider is the interface for providers that support country data.
+type CountryProvider interface {
+	GetCountries(ctx context.Context) ([]market.CountrySummary, error)
+	GetCountryStocks(ctx context.Context) ([]market.CountryWithStocks, error)
+}
+
 // Service orchestrates market data fetching across providers with fallback support.
 type Service struct {
 	mode     config.ProviderMode
@@ -186,4 +192,26 @@ func (s *Service) GetIndustries(ctx context.Context) ([]market.IndustrySummary, 
 		return nil, fmt.Errorf("provider %s does not support sector data", s.primary.Name())
 	}
 	return sp.GetIndustries(ctx)
+}
+
+func (s *Service) GetCountries(ctx context.Context) ([]market.CountrySummary, error) {
+	if s.mode == config.ProviderLegacy {
+		return nil, fmt.Errorf("country command requires nasdaq provider")
+	}
+	cp, ok := s.primary.(CountryProvider)
+	if !ok {
+		return nil, fmt.Errorf("provider %s does not support country data", s.primary.Name())
+	}
+	return cp.GetCountries(ctx)
+}
+
+func (s *Service) GetCountryStocks(ctx context.Context) ([]market.CountryWithStocks, error) {
+	if s.mode == config.ProviderLegacy {
+		return nil, fmt.Errorf("country command requires nasdaq provider")
+	}
+	cp, ok := s.primary.(CountryProvider)
+	if !ok {
+		return nil, fmt.Errorf("provider %s does not support country data", s.primary.Name())
+	}
+	return cp.GetCountryStocks(ctx)
 }

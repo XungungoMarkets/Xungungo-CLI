@@ -241,6 +241,107 @@ func (p *Provider) GetIndustries(ctx context.Context) ([]market.IndustrySummary,
 	return result, nil
 }
 
+func (p *Provider) GetCountries(ctx context.Context) ([]market.CountrySummary, error) {
+	resp, err := p.client.GetScreenerStocks(ctx, true)
+	if err != nil {
+		return nil, err
+	}
+
+	type accum struct {
+		sum   float64
+		count int
+	}
+	countries := make(map[string]*accum)
+
+	for _, row := range resp.Rows {
+		country := strings.TrimSpace(row.Country)
+		if country == "" {
+			continue
+		}
+		pct, err := parse.ParseFloat(row.PercentageChange)
+		if err != nil {
+			continue
+		}
+		if _, ok := countries[country]; !ok {
+			countries[country] = &accum{}
+		}
+		countries[country].sum += pct
+		countries[country].count++
+	}
+
+	result := make([]market.CountrySummary, 0, len(countries))
+	for name, a := range countries {
+		result = append(result, market.CountrySummary{
+			Country:   name,
+			AvgChange: a.sum / float64(a.count),
+			Count:     a.count,
+		})
+	}
+
+	sort.Slice(result, func(i, j int) bool {
+		return result[i].AvgChange > result[j].AvgChange
+	})
+
+	return result, nil
+}
+
+func (p *Provider) GetCountryStocks(ctx context.Context) ([]market.CountryWithStocks, error) {
+	resp, err := p.client.GetScreenerStocks(ctx, true)
+	if err != nil {
+		return nil, err
+	}
+
+	type accum struct {
+		sum    float64
+		stocks []market.StockDetail
+	}
+	groups := make(map[string]*accum)
+	order := make([]string, 0)
+
+	for _, row := range resp.Rows {
+		country := strings.TrimSpace(row.Country)
+		if country == "" {
+			continue
+		}
+		pct, err := parse.ParseFloat(row.PercentageChange)
+		if err != nil {
+			continue
+		}
+		if _, ok := groups[country]; !ok {
+			groups[country] = &accum{}
+			order = append(order, country)
+		}
+		groups[country].sum += pct
+		groups[country].stocks = append(groups[country].stocks, market.StockDetail{
+			Symbol:    strings.TrimSpace(row.Symbol),
+			Name:      strings.TrimSpace(row.Name),
+			ChangePct: pct,
+		})
+	}
+
+	result := make([]market.CountryWithStocks, 0, len(groups))
+	for _, country := range order {
+		a := groups[country]
+		count := len(a.stocks)
+		stocks := a.stocks
+		sort.Slice(stocks, func(i, j int) bool {
+			return stocks[i].ChangePct > stocks[j].ChangePct
+		})
+		result = append(result, market.CountryWithStocks{
+			Country:   country,
+			AvgChange: a.sum / float64(count),
+			Count:     count,
+			Stocks:    stocks,
+		})
+	}
+
+	sort.Slice(result, func(i, j int) bool {
+		return result[i].AvgChange > result[j].AvgChange
+	})
+
+	return result, nil
+}
+
 func (p *Provider) Search(ctx context.Context, query string, limit int, includeMarketData bool) ([]market.SearchResult, error) {
 	resp, err := p.client.Search(ctx, strings.TrimSpace(query), limit, includeMarketData)
 	if err == nil && resp != nil {
