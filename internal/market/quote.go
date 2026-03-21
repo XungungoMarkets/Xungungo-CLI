@@ -12,6 +12,16 @@ type StockQuote struct {
 	ChangePercent float64 `json:"change_percent"`
 	Volume        int     `json:"volume"`
 	MarketCap     int64   `json:"market_cap"`
+
+	// Extended session data (populated by Yahoo provider)
+	PreviousClose          float64 `json:"previous_close,omitempty"`
+	MarketState            string  `json:"market_state,omitempty"`
+	PreMarketPrice         float64 `json:"pre_market_price,omitempty"`
+	PreMarketChange        float64 `json:"pre_market_change,omitempty"`
+	PreMarketChangePercent float64 `json:"pre_market_change_percent,omitempty"`
+	PostMarketPrice         float64 `json:"post_market_price,omitempty"`
+	PostMarketChange        float64 `json:"post_market_change,omitempty"`
+	PostMarketChangePercent float64 `json:"post_market_change_percent,omitempty"`
 }
 
 type Bar struct {

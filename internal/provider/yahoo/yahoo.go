@@ -40,6 +40,15 @@ func (p *Provider) GetQuote(_ context.Context, symbol string) (*market.StockQuot
 		ChangePercent: q.RegularMarketChangePercent,
 		Volume:        q.RegularMarketVolume,
 		MarketCap:     0,
+
+		PreviousClose:           q.RegularMarketPreviousClose,
+		MarketState:             string(q.MarketState),
+		PreMarketPrice:          q.PreMarketPrice,
+		PreMarketChange:         q.PreMarketChange,
+		PreMarketChangePercent:  q.PreMarketChangePercent,
+		PostMarketPrice:         q.PostMarketPrice,
+		PostMarketChange:        q.PostMarketChange,
+		PostMarketChangePercent: q.PostMarketChangePercent,
 	}, nil
 }
 

@@ -1,6 +1,9 @@
 package output
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 func formatNumber(n int) string {
 	if n >= 1_000_000_000 {
@@ -36,4 +39,33 @@ func maxLen(strs ...string) int {
 		}
 	}
 	return max
+}
+
+// visLen returns the visible (terminal) length of a string, excluding ANSI escape codes.
+func visLen(s string) int {
+	n := 0
+	inEscape := false
+	for _, r := range s {
+		if inEscape {
+			if r == 'm' {
+				inEscape = false
+			}
+			continue
+		}
+		if r == '\x1b' {
+			inEscape = true
+			continue
+		}
+		n++
+	}
+	return n
+}
+
+// padRight pads s with spaces on the right to reach the given visible width.
+func padRight(s string, width int) string {
+	pad := width - visLen(s)
+	if pad <= 0 {
+		return s
+	}
+	return s + strings.Repeat(" ", pad)
 }
