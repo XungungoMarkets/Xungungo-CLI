@@ -46,30 +46,34 @@ func (p *Provider) Name() string {
 }
 
 func (p *Provider) GetQuote(ctx context.Context, symbol string) (*market.StockQuote, error) {
-	row, err := p.client.GetQuote(ctx, strings.ToUpper(symbol), nasdaqapi.SymbolTypeStock)
+	sym := strings.ToUpper(symbol)
+
+	// Primary: typed info endpoint — gives market status and extended session data.
+	info, err := p.client.GetQuoteInfo(ctx, sym, nasdaqapi.AssetClassStock)
 	if err == nil {
-		quote, mapErr := mapQuoteRowToStockQuote(row, symbol)
-		if mapErr == nil {
-			return quote, nil
+		if q, mapErr := mapQuoteInfoToStockQuote(info, symbol); mapErr == nil {
+			return q, nil
 		}
-		err = mapErr
 	}
 
-	// Fallback parsing path for changed watchlist response shapes.
-	directRow, directErr := p.getQuoteViaWatchlist(ctx, symbol)
-	if directErr == nil {
-		quote, mapErr := mapQuoteRowToStockQuote(directRow, symbol)
-		if mapErr == nil {
-			return quote, nil
+	// Fallback 1: SDK watchlist.
+	if row, wlErr := p.client.GetQuote(ctx, sym, nasdaqapi.SymbolTypeStock); wlErr == nil {
+		if q, mapErr := mapQuoteRowToStockQuote(row, symbol); mapErr == nil {
+			return q, nil
 		}
-		err = mapErr
 	}
 
-	quote, err := mapQuoteRowToStockQuote(row, symbol)
+	// Fallback 2: direct watchlist parsing.
+	if directRow, directErr := p.getQuoteViaWatchlist(ctx, symbol); directErr == nil {
+		if q, mapErr := mapQuoteRowToStockQuote(directRow, symbol); mapErr == nil {
+			return q, nil
+		}
+	}
+
 	if err != nil {
-		return nil, config.NewRecoverableError("nasdaq_quote_parse", err)
+		return nil, config.NewRecoverableError("nasdaq_quote", err)
 	}
-	return quote, nil
+	return nil, config.NewRecoverableError("nasdaq_quote", fmt.Errorf("all quote methods failed for %s", sym))
 }
 
 func (p *Provider) GetHistory(ctx context.Context, symbol string, period string) ([]market.Bar, error) {
@@ -407,7 +411,81 @@ func mapQuoteRowToStockQuote(row *nasdaqapi.QuoteRow, fallbackSymbol string) (*m
 		ChangePercent: changePct,
 		Volume:        volume,
 		MarketCap:     marketCap,
+		MarketState:   normalizeNasdaqMarketStatus(row.MarketStatus),
 	}, nil
+}
+
+func normalizeNasdaqMarketStatus(status string) string {
+	switch strings.TrimSpace(status) {
+	case "Open":
+		return "REGULAR"
+	case "Closed":
+		return "CLOSED"
+	case "Pre-Market":
+		return "PRE"
+	case "After-Hours":
+		return "POST"
+	default:
+		return status
+	}
+}
+
+func mapQuoteInfoToStockQuote(info *nasdaqapi.QuoteInfo, fallbackSymbol string) (*market.StockQuote, error) {
+	if info == nil {
+		return nil, fmt.Errorf("nil quote info")
+	}
+	symbol := strings.ToUpper(strings.TrimSpace(info.Symbol))
+	if symbol == "" {
+		symbol = strings.ToUpper(strings.TrimSpace(fallbackSymbol))
+	}
+	if symbol == "" {
+		return nil, fmt.Errorf("empty symbol")
+	}
+
+	price, err := parse.ParseFloat(info.PrimaryData.LastSalePrice)
+	if err != nil {
+		return nil, fmt.Errorf("parse price: %w", err)
+	}
+	change, err := parse.ParseFloat(info.PrimaryData.NetChange)
+	if err != nil {
+		return nil, fmt.Errorf("parse change: %w", err)
+	}
+	changePct, err := parse.ParseFloat(info.PrimaryData.PercentageChange)
+	if err != nil {
+		return nil, fmt.Errorf("parse change pct: %w", err)
+	}
+	volume, _ := parse.ParseInt(info.PrimaryData.Volume)
+
+	marketState := normalizeNasdaqMarketStatus(info.MarketStatus)
+
+	q := &market.StockQuote{
+		Symbol:        symbol,
+		Name:          strings.TrimSpace(info.CompanyName),
+		Price:         price,
+		Change:        change,
+		ChangePercent: changePct,
+		Volume:        volume,
+		MarketState:   marketState,
+	}
+
+	// During extended sessions secondaryData holds the extended-session price.
+	if info.SecondaryData != nil {
+		extPrice, _ := parse.ParseFloat(info.SecondaryData.LastSalePrice)
+		extChange, _ := parse.ParseFloat(info.SecondaryData.NetChange)
+		extChangePct, _ := parse.ParseFloat(info.SecondaryData.PercentageChange)
+		switch marketState {
+		case "PRE":
+			q.PreMarketPrice = extPrice
+			q.PreMarketChange = extChange
+			q.PreMarketChangePercent = extChangePct
+		case "POST":
+			q.PostMarketPrice = extPrice
+			q.PostMarketChange = extChange
+			q.PostMarketChangePercent = extChangePct
+		}
+	}
+
+	return q, nil
 }
 
 func mapSearchSuggestion(s nasdaqapi.SearchSuggestion) market.SearchResult {
@@ -654,7 +732,7 @@ func (p *Provider) getQuoteViaWatchlist(ctx context.Context, symbol string) (*na
 		return nil, fmt.Errorf("status %d", generic.Status.RCode)
 	}
 
-	// New shape: data.rows
+	// New shape: data.rows (returned when type=Rv)
 	var rowsShape struct {
 		Rows []struct {
 			Symbol    string `json:"symbol"`

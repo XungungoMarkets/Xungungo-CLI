@@ -10,6 +10,10 @@ github.com/XungungoMarkets/xgg-nasdaq-go v0.0.0-20260317212717-c1ff382e136b h1:2
 github.com/XungungoMarkets/xgg-nasdaq-go v0.0.0-20260317212717-c1ff382e136b/go.mod h1:lGtuNw0eiOg1wUMAUvo1KMIzpq0n6e2iVfj8cJVJBmU=
 github.com/XungungoMarkets/xgg-nasdaq-go v0.0.0-20260318013729-1551a3d5b3b5 h1:v8pQz+I8ir7RAXqqKUJKRaXiT3faCNSpGe8gC+bdZyk=
 github.com/XungungoMarkets/xgg-nasdaq-go v0.0.0-20260318013729-1551a3d5b3b5/go.mod h1:lGtuNw0eiOg1wUMAUvo1KMIzpq0n6e2iVfj8cJVJBmU=
+github.com/XungungoMarkets/xgg-nasdaq-go v0.0.0-20260321030553-1f5263535d1c h1:uwHWwQXYwrL9UtS7Hs0E7CUqBERRIWTNW6jqxuwgvfg=
+github.com/XungungoMarkets/xgg-nasdaq-go v0.0.0-20260321030553-1f5263535d1c/go.mod h1:lGtuNw0eiOg1wUMAUvo1KMIzpq0n6e2iVfj8cJVJBmU=
+github.com/XungungoMarkets/xgg-nasdaq-go v0.0.0-20260321123556-83e16605e742 h1:ighhzb5cP3exGTn8x0z6fQVe3vBQDFQUbl9Kmno5nB8=
+github.com/XungungoMarkets/xgg-nasdaq-go v0.0.0-20260321123556-83e16605e742/go.mod h1:lGtuNw0eiOg1wUMAUvo1KMIzpq0n6e2iVfj8cJVJBmU=
 github.com/blang/semver v3.5.1+incompatible h1:cQNTCjp13qL8KC3Nbxr/y2Bqb63oX6wdnnjpJbkM4JQ=
 github.com/blang/semver v3.5.1+incompatible/go.mod h1:kRBLl5iJ+tD4TcOOxsy/0fnwebNt5EWlYSAyrTnjyyk=
 github.com/cpuguy83/go-md2man/v2 v2.0.6/go.mod h1:oOW0eioCTA6cOiMLiUPZOpcVxMig6NIQQ7OS05n1F4g=

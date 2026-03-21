@@ -28,7 +28,7 @@
 
 ## ✨ Features
 
-- 📊 **Real-time quotes**: Get current prices for any stock
+- 📊 **Real-time quotes**: Get current prices for any stock, with market state badge (Open / Closed / Pre-Market / After Hours) and extended session data
 - 📈 **Historical data**: Access OHLCV data (Open, High, Low, Close, Volume)
 - 📉 **Technical analysis**: RSI, MACD, SMA, EMA, Bollinger Bands
 - 🖼️ **Chart generation**: Render line and candlestick charts as PNG images
@@ -45,12 +45,12 @@
 
 ### From GitHub Releases (Recommended) ⭐
 
-Download pre-compiled binary for your operating system from [v0.2.8 Release](https://github.com/XungungoMarkets/Xungungo-CLI/releases/tag/v0.2.8) page.
+Download pre-compiled binary for your operating system from [v0.2.9 Release](https://github.com/XungungoMarkets/Xungungo-CLI/releases/tag/v0.2.9) page.
 
 **Linux/macOS:**
 ```bash
 # Download file
-wget https://github.com/XungungoMarkets/Xungungo-CLI/releases/download/v0.2.8/xgg-linux-amd64.tar.gz
+wget https://github.com/XungungoMarkets/Xungungo-CLI/releases/download/v0.2.9/xgg-linux-amd64.tar.gz
 
 # Extract
 tar xzf xgg-linux-amd64.tar.gz
@@ -62,7 +62,7 @@ sudo mv xgg /usr/local/bin/
 **macOS (Apple Silicon):**
 ```bash
 # Download
-wget https://github.com/XungungoMarkets/Xungungo-CLI/releases/download/v0.2.8/xgg-darwin-arm64.tar.gz
+wget https://github.com/XungungoMarkets/Xungungo-CLI/releases/download/v0.2.9/xgg-darwin-arm64.tar.gz
 
 # Extract
 tar xzf xgg-darwin-arm64.tar.gz
@@ -74,7 +74,7 @@ sudo mv xgg /usr/local/bin/
 **Windows:**
 ```powershell
 # Download file
-# https://github.com/XungungoMarkets/Xungungo-CLI/releases/download/v0.2.8/xgg-windows-amd64.zip
+# https://github.com/XungungoMarkets/Xungungo-CLI/releases/download/v0.2.9/xgg-windows-amd64.zip
 
 # Extract and move to a folder in your PATH
 ```
@@ -232,14 +232,39 @@ Get the current price of a stock:
 xgg stock NVDA
 ```
 
-**Output:**
+**Output (market open):**
 ```
-┌─────────────────────────────────────────┐
-│  NVDA - NVIDIA Corporation             │
-│  $875.28  ▲ +12.34 (+1.43%)             │
-│  Vol: 45.2M  │  Mkt Cap: 2.2T          │
-└─────────────────────────────────────────┘
+┌──────────────────────────────────────────────┐
+│  NVDA - NVIDIA Corporation   ● Open          │
+├──────────────────────────────────────────────┤
+│  $875.28  ▲ +12.34 (+1.43%)                  │
+│  Vol: 45.2M  │  Mkt Cap: 0                   │
+└──────────────────────────────────────────────┘
 ```
+
+**Output (after hours):**
+```
+┌──────────────────────────────────────────────┐
+│  NVDA - NVIDIA Corporation   ● After Hours   │
+├──────────────────────────────────────────────┤
+│  Close:       $875.28  ▲ +12.34 (+1.43%)     │
+│  After Hours: $878.50  ▲ +3.22 (+0.37%)      │
+│  Vol: 45.2M  │  Mkt Cap: 0                   │
+└──────────────────────────────────────────────┘
+```
+
+**Output (pre-market):**
+```
+┌──────────────────────────────────────────────┐
+│  NVDA - NVIDIA Corporation   ● Pre-Market    │
+├──────────────────────────────────────────────┤
+│  Prev Close:  $875.28                        │
+│  Pre-Market:  $878.00  ▲ +2.72 (+0.31%)      │
+│  Vol: 45.2M  │  Mkt Cap: 0                   │
+└──────────────────────────────────────────────┘
+```
+
+The market state badge automatically reflects the current session: `● Open`, `● Closed`, `● Pre-Market`, or `● After Hours`.
 
 Get quotes for multiple stocks at once:
 
@@ -249,13 +274,15 @@ xgg stock NVDA AAPL TSLA MSFT GOOGL
 
 ### Symbol Search
 
-Search symbols (stocks, ETFs, indices) using Nasdaq autosuggest:
+Search symbols (stocks, ETFs, indices) combining results from NASDAQ and Yahoo Finance:
 
 ```bash
 xgg search NVDA
 xgg search Apple --limit 20
 xgg search semiconductors --json
 ```
+
+Results are shown in a table with a **Source** column indicating where each result came from (`NASDAQ` or `Yahoo`).
 
 ### Historical Data
 
@@ -497,7 +524,7 @@ xgg version
 **Output:**
 ```
 📈 Xungungo CLI
-Version: 0.2.8
+Version: 0.2.9
 GitHub: https://github.com/XungungoMarkets/Xungungo-CLI
 ```
 
@@ -509,15 +536,15 @@ xgg check-update
 
 **Output:**
 ```
-✓ You are using the latest version: 0.2.8
+✓ You are using the latest version: 0.2.9
 ```
 
 Or if an update is available:
 ```
 ⚠ A new version is available!
-  Current: 0.2.8
-  Latest: 0.2.7
-  Release:  https://github.com/XungungoMarkets/Xungungo-CLI/releases/download/v0.2.7/xgg-linux-amd64.tar.gz
+  Current: 0.2.9
+  Latest: 0.2.10
+  Release:  https://github.com/XungungoMarkets/Xungungo-CLI/releases/download/v0.2.10/xgg-linux-amd64.tar.gz
 
 Run 'xgg update' to update to the latest version.
 ```
