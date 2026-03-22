@@ -14,9 +14,9 @@ func PrintRSI(data *analysis.RSIOutput) {
 		return
 	}
 	fmt.Printf("📊 %s - RSI (14)\n", data.Symbol)
-	fmt.Printf("┌─────────────────────────────┐\n")
+	fmt.Printf("┌────────────────────────────┐\n")
 	fmt.Printf("│ Current RSI: %7.2f       │\n", data.Value)
-	fmt.Printf("└─────────────────────────────┘\n")
+	fmt.Printf("└────────────────────────────┘\n")
 	fmt.Println()
 
 	if data.Signal == "overbought" {
@@ -34,11 +34,11 @@ func PrintMACD(data *analysis.MACDOutput) {
 		return
 	}
 	fmt.Printf("📊 %s - MACD (12, 26, 9)\n", data.Symbol)
-	fmt.Printf("┌─────────────────────────────┐\n")
-	fmt.Printf("│ MACD Line:  %7.2f       │\n", data.MACD)
-	fmt.Printf("│ Signal Line:%7.2f       │\n", data.Signal)
-	fmt.Printf("│ Histogram:  %7.2f       │\n", data.Histogram)
-	fmt.Printf("└─────────────────────────────┘\n")
+	fmt.Printf("┌────────────────────────────┐\n")
+	fmt.Printf("│ MACD Line:  %7.2f        │\n", data.MACD)
+	fmt.Printf("│ Signal Line:%7.2f        │\n", data.Signal)
+	fmt.Printf("│ Histogram:  %7.2f        │\n", data.Histogram)
+	fmt.Printf("└────────────────────────────┘\n")
 	fmt.Println()
 
 	if data.SignalType == "bullish" {
@@ -56,13 +56,16 @@ func PrintSMA(data *analysis.SMAOutput) {
 		return
 	}
 	fmt.Printf("📊 %s - Simple Moving Averages\n", data.Symbol)
-	fmt.Printf("┌─────────────────────────────┐\n")
+	fmt.Printf("┌────────────────────────────┐\n")
 	fmt.Printf("│ Current Price: $%7.2f    │\n", data.CurrentPrice)
 	fmt.Printf("│ SMA 20:        $%7.2f    │\n", data.SMA20)
 	if !math.IsNaN(data.SMA50) {
 		fmt.Printf("│ SMA 50:        $%7.2f    │\n", data.SMA50)
 	}
-	fmt.Printf("└─────────────────────────────┘\n")
+	if data.SMA200 != 0 {
+		fmt.Printf("│ SMA 200:       $%7.2f    │\n", data.SMA200)
+	}
+	fmt.Printf("└────────────────────────────┘\n")
 	fmt.Println()
 
 	if data.Trend == "uptrend" {
@@ -80,11 +83,14 @@ func PrintEMA(data *analysis.EMAOutput) {
 		return
 	}
 	fmt.Printf("📊 %s - Exponential Moving Averages\n", data.Symbol)
-	fmt.Printf("┌─────────────────────────────┐\n")
+	fmt.Printf("┌────────────────────────────┐\n")
 	fmt.Printf("│ Current Price: $%7.2f    │\n", data.CurrentPrice)
 	fmt.Printf("│ EMA 12:        $%7.2f    │\n", data.EMA12)
 	fmt.Printf("│ EMA 26:        $%7.2f    │\n", data.EMA26)
-	fmt.Printf("└─────────────────────────────┘\n")
+	if data.EMA200 != 0 {
+		fmt.Printf("│ EMA 200:       $%7.2f    │\n", data.EMA200)
+	}
+	fmt.Printf("└────────────────────────────┘\n")
 	fmt.Println()
 
 	if data.Trend == "bullish" {
@@ -102,12 +108,12 @@ func PrintBollingerBands(data *analysis.BollingerBandsOutput) {
 		return
 	}
 	fmt.Printf("📊 %s - Bollinger Bands (20, 2)\n", data.Symbol)
-	fmt.Printf("┌─────────────────────────────┐\n")
-	fmt.Printf("│ Upper Band:   $%7.2f    │\n", data.Upper)
-	fmt.Printf("│ Middle (SMA):$%7.2f    │\n", data.Middle)
-	fmt.Printf("│ Lower Band:   $%7.2f    │\n", data.Lower)
-	fmt.Printf("│ Current Price:$%7.2f    │\n", data.CurrentPrice)
-	fmt.Printf("└─────────────────────────────┘\n")
+	fmt.Printf("┌────────────────────────────┐\n")
+	fmt.Printf("│ Upper Band:   $%7.2f     │\n", data.Upper)
+	fmt.Printf("│ Middle (SMA): $%7.2f     │\n", data.Middle)
+	fmt.Printf("│ Lower Band:   $%7.2f     │\n", data.Lower)
+	fmt.Printf("│ Current Price:$%7.2f     │\n", data.CurrentPrice)
+	fmt.Printf("└────────────────────────────┘\n")
 	fmt.Println()
 
 	if data.Position == "above_upper" {

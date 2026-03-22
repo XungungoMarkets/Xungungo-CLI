@@ -28,7 +28,13 @@ var technicalCmd = &cobra.Command{
   xgg technical NVDA --json`,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		bars, err := provider.GetHistory(args[0], technicalPeriod)
+		period := technicalPeriod
+		if minP := minPeriodForTechnical(technicalIndicator); minP != "" &&
+			periodDaysTech(period) < periodDaysTech(minP) {
+			period = minP
+		}
+
+		bars, err := provider.GetHistory(args[0], period)
 		if err != nil {
 			return fmt.Errorf("error fetching history for %s: %w", args[0], err)
 		}
@@ -197,6 +203,85 @@ func GetEMAData(symbol string, bars []market.Bar) *analysis.EMAOutput {
 // GetBollingerBandsData delegates to analysis package (kept for test compatibility)
 func GetBollingerBandsData(symbol string, bars []market.Bar) *analysis.BollingerBandsOutput {
 	return analysis.GetBollingerBandsData(symbol, bars)
+}
+
+// minPeriodForTechnical returns the minimum fetch period required to compute
+// all requested indicators. Returns "" if the default period is sufficient.
+func minPeriodForTechnical(indicator string) string {
+	maxBars := 0
+	for _, ind := range strings.Split(indicator, ",") {
+		ind = strings.TrimSpace(ind)
+		var need int
+		switch ind {
+		case "all":
+			need = 200 // SMA(200) / EMA(200) is the largest
+		case "rsi":
+			need = 14
+		case "macd":
+			need = 35 // 26 slow EMA + 9 signal
+		case "sma":
+			need = 200
+		case "ema":
+			need = 200
+		case "bb":
+			need = 20
+		}
+		if need > maxBars {
+			maxBars = need
+		}
+	}
+	if maxBars == 0 {
+		return ""
+	}
+	// 1.5× buffer to account for weekends and holidays
+	calDays := int(float64(maxBars) * 1.5)
+	for _, p := range []struct {
+		s string
+		d int
+	}{
+		{"1m", 30}, {"2m", 60}, {"3m", 90}, {"6m", 180},
+		{"9m", 270}, {"1y", 365}, {"2y", 730},
+	} {
+		if p.d >= calDays {
+			return p.s
+		}
+	}
+	return "2y"
+}
+
+func periodDaysTech(p string) int {
+	switch p {
+	case "5d":
+		return 5
+	case "1w":
+		return 7
+	case "2w":
+		return 14
+	case "1m":
+		return 30
+	case "2m":
+		return 60
+	case "3m":
+		return 90
+	case "6m":
+		return 180
+	case "9m":
+		return 270
+	case "1y":
+		return 365
+	case "2y":
+		return 730
+	case "3y":
+		return 1095
+	case "5y":
+		return 1825
+	case "10y":
+		return 3650
+	case "max":
+		return 7300
+	default:
+		return 30
+	}
 }
 
 func init() {

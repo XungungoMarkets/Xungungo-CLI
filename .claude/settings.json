@@ -33,7 +33,10 @@
       "Read(//d/Desarrollo/xgg-nasdaq-go/nasdaq/**)",
       "Read(//d/Desarrollo/xgg-nasdaq-go/**)",
       "Bash(git tag:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(go -C \"D:/Desarrollo/xgg-nasdaq-go\" build ./...)"
     ],
     "additionalDirectories": [
       "D:\\Desarrollo\\xgg-nasdaq-go\\nasdaq"

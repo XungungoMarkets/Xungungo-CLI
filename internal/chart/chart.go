@@ -37,11 +37,6 @@ func RenderLine(symbol string, bars []market.Bar, width, height int, theme, indi
 		return nil, fmt.Errorf("no data to render")
 	}
 
-	trendLines, indLabels, err := ResolveIndicators(indicators)
-	if err != nil {
-		return nil, err
-	}
-
 	closes := make([]float64, len(bars))
 	labels := make([]string, len(bars))
 	dateFmt := dateLabelFormat(interval)
@@ -50,11 +45,17 @@ func RenderLine(symbol string, bars []market.Bar, width, height int, theme, indi
 		labels[i] = b.Date.Format(dateFmt)
 	}
 
-	seriesName := "Close"
-	legendNames := append([]string{seriesName}, indLabels...)
+	resolved, err := ResolveIndicators(indicators, closes)
+	if err != nil {
+		return nil, err
+	}
 
-	opt := charts.NewLineChartOptionWithData([][]float64{closes})
-	opt.Title.Text = chartTitle(symbol, "Close Price", interval, indLabels)
+	// Build all data series: price first, then pre-computed MAs.
+	allSeries := append([][]float64{closes}, resolved.PrecomputedSeries...)
+	legendNames := append([]string{"Close"}, resolved.Labels...)
+
+	opt := charts.NewLineChartOptionWithData(allSeries)
+	opt.Title.Text = chartTitle(symbol, "Close Price", interval, resolved.Labels)
 	opt.Title.FontStyle.FontSize = 14
 	opt.XAxis.Labels = labels
 	opt.XAxis.LabelCount = labelCount(len(bars))
@@ -62,11 +63,20 @@ func RenderLine(symbol string, bars []market.Bar, width, height int, theme, indi
 	opt.Theme = charts.GetTheme(theme)
 	opt.LineStrokeWidth = 1.5
 	opt.Symbol = charts.SymbolDot
-	opt.FillArea = charts.Ptr(true)
-	opt.FillOpacity = 40
 	opt.Padding = charts.NewBoxEqual(20)
-	// Attach trend lines to the first (only) series
-	opt.SeriesList[0].TrendLine = trendLines
+	// Fill only when there are no MA overlays (fill areas would stack awkwardly over MAs)
+	if len(resolved.PrecomputedSeries) == 0 {
+		opt.FillArea = charts.Ptr(true)
+		opt.FillOpacity = 40
+	}
+	// MA series: no dots, no trend line re-processing
+	for i := range resolved.PrecomputedSeries {
+		si := i + 1 // series index (0 = price)
+		opt.SeriesList[si].TrendLine = nil
+		opt.SeriesList[si].Symbol = charts.SymbolNone
+	}
+	// Library trend lines (bb, linear, cubic) attach to price series
+	opt.SeriesList[0].TrendLine = resolved.TrendLines
 
 	p := charts.NewPainter(charts.PainterOptions{
 		OutputFormat: charts.ChartOutputPNG,
@@ -88,7 +98,7 @@ func RenderCandlestick(symbol string, bars []market.Bar, width, height int, them
 		return nil, fmt.Errorf("no data to render")
 	}
 
-	trendLines, indLabels, err := ResolveIndicators(indicators)
+	trendLines, indLabels, err := CandlestickIndicators(indicators)
 	if err != nil {
 		return nil, err
 	}

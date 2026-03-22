@@ -36,7 +36,19 @@ var chartCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		symbol := strings.ToUpper(strings.TrimSpace(args[0]))
 
-		bars, meta, err := provider.ServiceHandle().GetHistory(context.Background(), symbol, chartPeriod)
+		interval := chart.ParseInterval(chartInterval)
+
+		// Auto-extend period if indicators need more bars than requested.
+		period := chartPeriod
+		if minP := chart.MinPeriodForIndicators(chartIndicators, interval); minP != "" &&
+			chart.PeriodDays(period) < chart.PeriodDays(minP) {
+			fmt.Fprintf(cmd.ErrOrStderr(),
+				"Note: period extended to %s to compute %s on %s bars\n",
+				minP, chartIndicators, chartInterval)
+			period = minP
+		}
+
+		bars, meta, err := provider.ServiceHandle().GetHistory(context.Background(), symbol, period)
 		if err != nil {
 			return fmt.Errorf("error fetching history for %s: %w", symbol, err)
 		}
@@ -52,8 +64,6 @@ var chartCmd = &cobra.Command{
 		if outPath == "" {
 			outPath = fmt.Sprintf("%s_chart.png", strings.ToLower(symbol))
 		}
-
-		interval := chart.ParseInterval(chartInterval)
 
 		var data []byte
 		switch strings.ToLower(chartType) {
@@ -89,6 +99,6 @@ func init() {
 	chartCmd.Flags().StringVar(&chartTheme, "theme", "dark",
 		"Color theme: light, dark, vivid-light, vivid-dark, ant, grafana")
 	chartCmd.Flags().StringVar(&chartIndicators, "indicator", "",
-		"Overlay indicators (comma-separated): sma20, sma50, sma200, ema12, ema26, ema50, bb, linear, cubic")
+		"Overlay indicators (comma-separated): sma20, sma40, sma50, sma100, sma200, ema12, ema26, ema50, ema100, ema200, bb, linear, cubic")
 	rootCmd.AddCommand(chartCmd)
 }

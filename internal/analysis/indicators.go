@@ -87,6 +87,12 @@ func GetSMAData(symbol string, bars []market.Bar) *SMAOutput {
 	lastSMA20 := sma20[len(sma20)-1]
 	lastSMA50 := sma50[len(sma50)-1]
 
+	var lastSMA200 float64
+	if len(bars) >= 200 {
+		sma200 := talib.Sma(closes, 200)
+		lastSMA200 = sma200[len(sma200)-1]
+	}
+
 	var trend string
 	if currentPrice > lastSMA20 && lastSMA20 > lastSMA50 {
 		trend = "uptrend"
@@ -98,10 +104,11 @@ func GetSMAData(symbol string, bars []market.Bar) *SMAOutput {
 
 	return &SMAOutput{
 		Symbol:       symbol,
-		Indicator:    "SMA(20,50)",
+		Indicator:    "SMA(20,50,200)",
 		CurrentPrice: currentPrice,
 		SMA20:        lastSMA20,
 		SMA50:        lastSMA50,
+		SMA200:       lastSMA200,
 		Trend:        trend,
 	}
 }
@@ -123,6 +130,12 @@ func GetEMAData(symbol string, bars []market.Bar) *EMAOutput {
 	lastEMA12 := ema12[len(ema12)-1]
 	lastEMA26 := ema26[len(ema26)-1]
 
+	var lastEMA200 float64
+	if len(bars) >= 200 {
+		ema200 := talib.Ema(closes, 200)
+		lastEMA200 = ema200[len(ema200)-1]
+	}
+
 	var trend string
 	if lastEMA12 > lastEMA26 {
 		trend = "bullish"
@@ -134,10 +147,11 @@ func GetEMAData(symbol string, bars []market.Bar) *EMAOutput {
 
 	return &EMAOutput{
 		Symbol:       symbol,
-		Indicator:    "EMA(12,26)",
+		Indicator:    "EMA(12,26,200)",
 		CurrentPrice: currentPrice,
 		EMA12:        lastEMA12,
 		EMA26:        lastEMA26,
+		EMA200:       lastEMA200,
 		Trend:        trend,
 	}
 }

@@ -27,6 +27,7 @@ type SMAOutput struct {
 	CurrentPrice float64 `json:"current_price"`
 	SMA20        float64 `json:"sma_20"`
 	SMA50        float64 `json:"sma_50"`
+	SMA200       float64 `json:"sma_200,omitempty"`
 	Trend        string  `json:"trend"` // "uptrend", "downtrend", "consolidation"
 }
 
@@ -37,6 +38,7 @@ type EMAOutput struct {
 	CurrentPrice float64 `json:"current_price"`
 	EMA12        float64 `json:"ema_12"`
 	EMA26        float64 `json:"ema_26"`
+	EMA200       float64 `json:"ema_200,omitempty"`
 	Trend        string  `json:"trend"` // "bullish", "bearish", "neutral"
 }
 
