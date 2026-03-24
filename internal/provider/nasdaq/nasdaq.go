@@ -289,6 +289,63 @@ func (p *Provider) GetCountries(ctx context.Context) ([]market.CountrySummary, e
 	return result, nil
 }
 
+func (p *Provider) GetSectorStocks(ctx context.Context) ([]market.SectorWithStocks, error) {
+	resp, err := p.client.GetScreenerStocks(ctx, true)
+	if err != nil {
+		return nil, err
+	}
+
+	type accum struct {
+		sum    float64
+		stocks []market.StockDetail
+	}
+	groups := make(map[string]*accum)
+	order := make([]string, 0)
+
+	for _, row := range resp.Rows {
+		sector := strings.TrimSpace(row.Sector)
+		if sector == "" {
+			continue
+		}
+		pct, err := parse.ParseFloat(row.PercentageChange)
+		if err != nil {
+			continue
+		}
+		if _, ok := groups[sector]; !ok {
+			groups[sector] = &accum{}
+			order = append(order, sector)
+		}
+		groups[sector].sum += pct
+		groups[sector].stocks = append(groups[sector].stocks, market.StockDetail{
+			Symbol:    strings.TrimSpace(row.Symbol),
+			Name:      strings.TrimSpace(row.Name),
+			ChangePct: pct,
+		})
+	}
+
+	result := make([]market.SectorWithStocks, 0, len(groups))
+	for _, sector := range order {
+		a := groups[sector]
+		count := len(a.stocks)
+		stocks := a.stocks
+		sort.Slice(stocks, func(i, j int) bool {
+			return stocks[i].ChangePct > stocks[j].ChangePct
+		})
+		result = append(result, market.SectorWithStocks{
+			Sector:    sector,
+			AvgChange: a.sum / float64(count),
+			Count:     count,
+			Stocks:    stocks,
+		})
+	}
+
+	sort.Slice(result, func(i, j int) bool {
+		return result[i].AvgChange > result[j].AvgChange
+	})
+
+	return result, nil
+}
+
 func (p *Provider) GetCountryStocks(ctx context.Context) ([]market.CountryWithStocks, error) {
 	resp, err := p.client.GetScreenerStocks(ctx, true)
 	if err != nil {

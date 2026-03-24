@@ -28,6 +28,7 @@ type SearchProvider interface {
 type SectorProvider interface {
 	GetSectors(ctx context.Context) ([]market.SectorSummary, error)
 	GetIndustries(ctx context.Context) ([]market.IndustrySummary, error)
+	GetSectorStocks(ctx context.Context) ([]market.SectorWithStocks, error)
 }
 
 // CountryProvider is the interface for providers that support country data.
@@ -224,6 +225,17 @@ func (s *Service) GetIndustries(ctx context.Context) ([]market.IndustrySummary, 
 		return nil, fmt.Errorf("provider %s does not support sector data", s.primary.Name())
 	}
 	return sp.GetIndustries(ctx)
+}
+
+func (s *Service) GetSectorStocks(ctx context.Context) ([]market.SectorWithStocks, error) {
+	if s.mode == config.ProviderLegacy {
+		return nil, fmt.Errorf("sectors command requires nasdaq provider")
+	}
+	sp, ok := s.primary.(SectorProvider)
+	if !ok {
+		return nil, fmt.Errorf("provider %s does not support sector data", s.primary.Name())
+	}
+	return sp.GetSectorStocks(ctx)
 }
 
 func (s *Service) GetCountries(ctx context.Context) ([]market.CountrySummary, error) {

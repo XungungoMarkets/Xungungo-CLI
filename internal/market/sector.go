@@ -36,3 +36,11 @@ type CountryWithStocks struct {
 	Count     int           `json:"count"`
 	Stocks    []StockDetail `json:"stocks"`
 }
+
+// SectorWithStocks holds a sector summary plus its individual stocks.
+type SectorWithStocks struct {
+	Sector    string        `json:"sector"`
+	AvgChange float64       `json:"avg_change_pct"`
+	Count     int           `json:"count"`
+	Stocks    []StockDetail `json:"stocks"`
+}

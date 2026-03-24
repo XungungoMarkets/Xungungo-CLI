@@ -134,6 +134,64 @@ func PrintIndustries(industries []market.IndustrySummary) {
 	printBorder("└", "─", "┘")
 }
 
+func PrintSectorStocks(sectors []market.SectorWithStocks) {
+	green := color.New(color.FgGreen).SprintFunc()
+	red := color.New(color.FgRed).SprintFunc()
+	bold := color.New(color.Bold).SprintFunc()
+	dim := color.New(color.Faint).SprintFunc()
+	cyan := color.New(color.FgCyan, color.Bold).SprintFunc()
+
+	border := strings.Repeat("─", indLineWidth)
+	printRow := func(line string) {
+		fmt.Printf("%s%s%s\n", dim("│"), line, dim("│"))
+	}
+	printBorder := func(l, m, r string) {
+		fmt.Printf("%s%s%s\n", dim(l), dim(border), dim(r))
+	}
+
+	headerName := fmt.Sprintf("%-*s", indNameCol, "Sector / Stock")
+	header := fmt.Sprintf("  %s %s  %*s  %*s  ",
+		" ", bold(headerName), indPctCol, bold("Chg%"), indCntCol, bold("Stocks"))
+	printBorder("┌", "─", "┐")
+	printRow(header)
+
+	const symWidth = 6
+	const indIndent = 2
+	const stockNameCol = indNameCol - indIndent - symWidth - 1
+
+	for _, s := range sectors {
+		printBorder("├", "─", "┤")
+
+		arrow := green("▲")
+		pctField := fmtPctField(s.AvgChange)
+		coloredPct := green(pctField)
+		if s.AvgChange < 0 {
+			arrow = red("▼")
+			coloredPct = red(pctField)
+		}
+		sectorNameField := fmt.Sprintf("%-*s", indNameCol, truncate(s.Sector, indNameCol))
+		printRow(fmt.Sprintf("  %s %s  %s  %*d  ",
+			arrow, cyan(bold(sectorNameField)), coloredPct, indCntCol, s.Count))
+
+		for _, st := range s.Stocks {
+			sArrow := green("▲")
+			sPct := fmtPctField(st.ChangePct)
+			sColoredPct := green(sPct)
+			if st.ChangePct < 0 {
+				sArrow = red("▼")
+				sColoredPct = red(sPct)
+			}
+			sym := fmt.Sprintf("%-*s", symWidth, truncate(st.Symbol, symWidth))
+			name := fmt.Sprintf("%-*s", stockNameCol, truncate(st.Name, stockNameCol))
+			nameField := fmt.Sprintf("%*s%s %s", indIndent, "", sym, name)
+			printRow(fmt.Sprintf("  %s %s  %s  %*s  ",
+				sArrow, nameField, sColoredPct, indCntCol, ""))
+		}
+	}
+
+	printBorder("└", "─", "┘")
+}
+
 func PrintCountryStocks(countries []market.CountryWithStocks) {
 	green := color.New(color.FgGreen).SprintFunc()
 	red := color.New(color.FgRed).SprintFunc()
