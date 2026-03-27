@@ -499,21 +499,31 @@ func mapQuoteInfoToStockQuote(info *nasdaqapi.QuoteInfo, fallbackSymbol string) 
 		return nil, fmt.Errorf("empty symbol")
 	}
 
-	price, err := parse.ParseFloat(info.PrimaryData.LastSalePrice)
+	marketState := normalizeNasdaqMarketStatus(info.MarketStatus)
+
+	// During extended sessions (PRE/POST), Nasdaq puts the extended-session price
+	// in primaryData and the regular-session close in secondaryData.
+	// During regular hours secondaryData is nil and primaryData is the current price.
+	priceSource := &info.PrimaryData
+	var extSource *nasdaqapi.QuoteSessionData
+	if info.SecondaryData != nil && (marketState == "PRE" || marketState == "POST") {
+		priceSource = info.SecondaryData
+		extSource = &info.PrimaryData
+	}
+
+	price, err := parse.ParseFloat(priceSource.LastSalePrice)
 	if err != nil {
 		return nil, fmt.Errorf("parse price: %w", err)
 	}
-	change, err := parse.ParseFloat(info.PrimaryData.NetChange)
+	change, err := parse.ParseFloat(priceSource.NetChange)
 	if err != nil {
 		return nil, fmt.Errorf("parse change: %w", err)
 	}
-	changePct, err := parse.ParseFloat(info.PrimaryData.PercentageChange)
+	changePct, err := parse.ParseFloat(priceSource.PercentageChange)
 	if err != nil {
 		return nil, fmt.Errorf("parse change pct: %w", err)
 	}
 	volume, _ := parse.ParseInt(info.PrimaryData.Volume)
-
-	marketState := normalizeNasdaqMarketStatus(info.MarketStatus)
 
 	q := &market.StockQuote{
 		Symbol:        symbol,
@@ -525,11 +535,10 @@ func mapQuoteInfoToStockQuote(info *nasdaqapi.QuoteInfo, fallbackSymbol string) 
 		MarketState:   marketState,
 	}
 
-	// During extended sessions secondaryData holds the extended-session price.
-	if info.SecondaryData != nil {
-		extPrice, _ := parse.ParseFloat(info.SecondaryData.LastSalePrice)
-		extChange, _ := parse.ParseFloat(info.SecondaryData.NetChange)
-		extChangePct, _ := parse.ParseFloat(info.SecondaryData.PercentageChange)
+	if extSource != nil {
+		extPrice, _ := parse.ParseFloat(extSource.LastSalePrice)
+		extChange, _ := parse.ParseFloat(extSource.NetChange)
+		extChangePct, _ := parse.ParseFloat(extSource.PercentageChange)
 		switch marketState {
 		case "PRE":
 			q.PreMarketPrice = extPrice
