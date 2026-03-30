@@ -403,6 +403,30 @@ func (p *Provider) GetCountryStocks(ctx context.Context) ([]market.CountryWithSt
 	return result, nil
 }
 
+func (p *Provider) GetScreenerRows(ctx context.Context) ([]market.ScreenerRow, error) {
+	resp, err := p.client.GetScreenerStocks(ctx, true)
+	if err != nil {
+		return nil, err
+	}
+	rows := make([]market.ScreenerRow, 0, len(resp.Rows))
+	for _, r := range resp.Rows {
+		rows = append(rows, market.ScreenerRow{
+			Symbol:           strings.TrimSpace(r.Symbol),
+			Name:             strings.TrimSpace(r.Name),
+			LastSalePrice:    strings.TrimSpace(r.LastSalePrice),
+			NetChange:        strings.TrimSpace(r.NetChange),
+			PercentageChange: strings.TrimSpace(r.PercentageChange),
+			Volume:           strings.TrimSpace(r.Volume),
+			MarketCap:        strings.TrimSpace(r.MarketCap),
+			Country:          strings.TrimSpace(r.Country),
+			IPOYear:          strings.TrimSpace(r.IPOYear),
+			Industry:         strings.TrimSpace(r.Industry),
+			Sector:           strings.TrimSpace(r.Sector),
+		})
+	}
+	return rows, nil
+}
+
 func (p *Provider) Search(ctx context.Context, query string, limit int, includeMarketData bool) ([]market.SearchResult, error) {
 	resp, err := p.client.Search(ctx, strings.TrimSpace(query), limit, includeMarketData)
 	if err == nil && resp != nil && len(resp.Data) > 0 {

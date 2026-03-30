@@ -44,3 +44,18 @@ type SectorWithStocks struct {
 	Count     int           `json:"count"`
 	Stocks    []StockDetail `json:"stocks"`
 }
+
+// ScreenerRow holds the raw screener data for a single stock as returned by the provider.
+type ScreenerRow struct {
+	Symbol           string `json:"symbol"`
+	Name             string `json:"name"`
+	LastSalePrice    string `json:"last_sale"`
+	NetChange        string `json:"net_change"`
+	PercentageChange string `json:"pct_change"`
+	Volume           string `json:"volume"`
+	MarketCap        string `json:"market_cap"`
+	Country          string `json:"country"`
+	IPOYear          string `json:"ipo_year"`
+	Industry         string `json:"industry"`
+	Sector           string `json:"sector"`
+}

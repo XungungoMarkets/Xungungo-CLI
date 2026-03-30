@@ -1,6 +1,6 @@
 ---
 name: xungungo
-description: Fetches real-time stock quotes, historical OHLCV data, technical analysis indicators (RSI, MACD, SMA, EMA, Bollinger Bands), generates PNG price charts, and shows market breadth by sector, industry, or country using the xgg CLI. Use when the user asks for stock prices, market data, trading indicators, historical prices, ETF symbol searches, wants to visualize a chart, or asks how sectors/countries are performing — even without explicitly mentioning xgg or Xungungo. Triggers — "what's NVDA trading at", "show me Apple stock", "RSI for MSFT", "MACD for Amazon last 3 months", "compare AAPL and TSLA", "search for semiconductor ETFs", "generate a candlestick chart for TSLA", "chart NVDA with Bollinger Bands", "plot AAPL over 1 year", "how is tech sector doing today", "which sectors are up", "show me stocks by country".
+description: Fetches real-time stock quotes, historical OHLCV data, technical analysis indicators (RSI, MACD, SMA, EMA, Bollinger Bands), generates PNG price charts, shows market breadth by sector, industry, or country, and queries the full NASDAQ stock screener using the xgg CLI. Use when the user asks for stock prices, market data, trading indicators, historical prices, ETF symbol searches, wants to visualize a chart, asks how sectors/countries are performing, or wants to browse/filter all listed stocks — even without explicitly mentioning xgg or Xungungo. Triggers — "what's NVDA trading at", "show me Apple stock", "RSI for MSFT", "MACD for Amazon last 3 months", "compare AAPL and TSLA", "search for semiconductor ETFs", "generate a candlestick chart for TSLA", "chart NVDA with Bollinger Bands", "plot AAPL over 1 year", "how is tech sector doing today", "which sectors are up", "show me stocks by country", "show me all NASDAQ stocks", "list stocks in the energy sector", "screener for US tech stocks".
 ---
 
 # Xungungo (xgg) — Financial Data CLI
@@ -13,8 +13,9 @@ xgg history SYMBOL --period PERIOD [--interval INTERVAL]              # Historic
 xgg technical SYMBOL --indicator INDICATOR --period PERIOD            # Technical analysis
 xgg search "query" [--limit N] [--market-data]                       # Symbol/ETF search
 xgg chart SYMBOL [options]                                            # Generate PNG chart
-xgg sectors [--by-industry]                                           # % change by sector
+xgg sectors [--by-industry] [--by-stock]                              # % change by sector
 xgg country [country name...] [--by-stock]                            # % change by country
+xgg screener [SYMBOL...] [--sector S] [--country C] [--industry I]   # Full screener table
 xgg version                                                           # Show version
 xgg update                                                            # Update xgg to latest
 xgg check-update                                                      # Check for updates
@@ -88,8 +89,10 @@ xgg technical SYMBOL --indicator INDICATOR --period PERIOD [--interval day|week|
 
 **Indicators:** `rsi`, `macd`, `sma`, `ema`, `bb`, `all` (comma-separated: `rsi,macd`)
 
-Minimum data requirements (show warning if not met):
-- RSI: 14 bars · MACD: 26 bars · SMA: 50 bars · EMA: 26 bars · BB: 20 bars
+Minimum data requirements — the period is **auto-extended** if the requested period has fewer bars than needed:
+- RSI: 14 bars · MACD: 35 bars (26 + 9 signal) · SMA/EMA: 200 bars · BB: 20 bars
+
+When auto-extension happens, a note is printed to stderr: `Note: period extended to Xm to compute SMA on Y bars`.
 
 ---
 
@@ -191,14 +194,22 @@ xgg sectors [--by-industry] [--json]
 | Flag | Description |
 |------|-------------|
 | `--by-industry` | Group by sector **and** industry |
+| `--by-stock` | Show individual stocks within each sector (with per-stock % change) |
+
+Optional sector filter argument (substring match):
+```bash
+xgg sectors --by-stock Energy
+```
 
 **Examples:**
 ```bash
 xgg sectors
 xgg sectors --by-industry
+xgg sectors --by-stock
+xgg sectors --by-stock Technology
 ```
 
-Use when the user asks "how are sectors doing", "which sectors are up/down", "tech vs energy today", or wants market breadth data.
+Use when the user asks "how are sectors doing", "which sectors are up/down", "tech vs energy today", "show me stocks in the energy sector", or wants market breadth data.
 
 ---
 
@@ -223,6 +234,35 @@ xgg country --by-stock hong kong
 ```
 
 Country name is case-insensitive and can be multiple words. Use when the user asks about stocks by country or region.
+
+---
+
+## screener command
+
+Full raw NASDAQ screener table with all fields for every listed stock.
+
+```bash
+xgg screener [SYMBOL...] [--sector S] [--country C] [--industry I] [--json]
+```
+
+| Flag | Description |
+|------|-------------|
+| `--sector` | Filter by sector (substring match, case-insensitive) |
+| `--country` | Filter by country (substring match, case-insensitive) |
+| `--industry` | Filter by industry (substring match, case-insensitive) |
+
+**Columns returned:** `SYM`, `Name`, `Price`, `Change`, `Chg%`, `Volume`, `MktCap`, `Country`, `IPO`, `Sector`, `Industry`
+
+**Examples:**
+```bash
+xgg screener                                   # all ~5000+ NASDAQ stocks
+xgg screener AAPL MSFT NVDA                    # specific symbols
+xgg screener --sector Technology               # all tech stocks
+xgg screener --country USA --sector Energy     # US energy stocks
+xgg screener --industry "Software" --json      # software stocks as JSON
+```
+
+Use when the user wants to browse all listed stocks, filter stocks by sector/country/industry, or get raw market data for a large set of stocks.
 
 ---
 

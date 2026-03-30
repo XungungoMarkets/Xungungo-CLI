@@ -37,6 +37,11 @@ type CountryProvider interface {
 	GetCountryStocks(ctx context.Context) ([]market.CountryWithStocks, error)
 }
 
+// ScreenerProvider is the interface for providers that support raw screener data.
+type ScreenerProvider interface {
+	GetScreenerRows(ctx context.Context) ([]market.ScreenerRow, error)
+}
+
 // Service orchestrates market data fetching across providers with fallback support.
 type Service struct {
 	mode     config.ProviderMode
@@ -258,4 +263,15 @@ func (s *Service) GetCountryStocks(ctx context.Context) ([]market.CountryWithSto
 		return nil, fmt.Errorf("provider %s does not support country data", s.primary.Name())
 	}
 	return cp.GetCountryStocks(ctx)
+}
+
+func (s *Service) GetScreenerRows(ctx context.Context) ([]market.ScreenerRow, error) {
+	if s.mode == config.ProviderLegacy {
+		return nil, fmt.Errorf("screener command requires nasdaq provider")
+	}
+	sp, ok := s.primary.(ScreenerProvider)
+	if !ok {
+		return nil, fmt.Errorf("provider %s does not support screener data", s.primary.Name())
+	}
+	return sp.GetScreenerRows(ctx)
 }

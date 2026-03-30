@@ -20,6 +20,7 @@
   - [Technical Analysis](#technical-analysis)
   - [Market Sectors](#market-sectors)
   - [Country Analysis](#country-analysis)
+  - [Stock Screener](#stock-screener)
   - [Version & Updates](#version--updates)
 - [Requirements](#requirements)
 - [License](#license)
@@ -34,6 +35,7 @@
 - 🖼️ **Chart generation**: Render line and candlestick charts as PNG images
 - 🏭 **Market sectors**: Average daily % change grouped by sector or industry
 - 🌍 **Country analysis**: Average daily % change grouped by country, with per-stock breakdown
+- 🔍 **Stock screener**: Full raw screener table with all fields (symbol, price, change, volume, market cap, country, IPO year, sector, industry)
 - 🎨 **Visual interface**: Colors and elegant formatting in terminal
 - ⚡ **Fast**: Multiple symbols in a single request
 - 📅 **Configurable periods**: 5 days, 1 month, 3 months, 6 months, 1 year, 5 years
@@ -512,6 +514,46 @@ xgg country --json
 xgg country --by-stock --json
 xgg country --by-stock hong kong --json
 ```
+
+### Stock Screener
+
+Show the full raw NASDAQ screener table with all available fields for every listed stock:
+
+```bash
+xgg screener
+```
+
+**Columns:** `SYM`, `Name`, `Price`, `Change`, `Chg%`, `Volume`, `MktCap`, `Country`, `IPO`, `Sector`, `Industry`
+
+Filter by specific symbols:
+
+```bash
+xgg screener AAPL MSFT NVDA
+```
+
+Filter by sector, country, or industry (substring match):
+
+```bash
+xgg screener --sector Technology
+xgg screener --country USA
+xgg screener --industry "Software"
+```
+
+Combine filters:
+
+```bash
+xgg screener --sector Technology --country USA
+xgg screener --sector Energy --json
+```
+
+JSON output:
+
+```bash
+xgg screener --json
+xgg screener --sector "Health Care" --json
+```
+
+---
 
 ### Version & Updates
 
